@@ -34,11 +34,11 @@ function latestCreated(list: Gravidanza[]): Gravidanza | undefined {
   );
 }
 
-function currentGravidanza(list: Gravidanza[]): Gravidanza | undefined {
+export function currentGravidanza(list: Gravidanza[]): Gravidanza | undefined {
   return latestCreated(list.filter((g) => g.stato === 'in_corso')) ?? latestCreated(list);
 }
 
-function byDataOra(a: Incontro, b: Incontro): number {
+export function byDataOra(a: Incontro, b: Incontro): number {
   if (a.data !== b.data) return a.data < b.data ? -1 : 1;
   if (a.ora === b.ora) return 0;
   if (!a.ora) return 1;

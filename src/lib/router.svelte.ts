@@ -22,9 +22,10 @@ function sync() {
 
 if (typeof window !== 'undefined') window.addEventListener('hashchange', sync);
 
-/** Navigate to a hash route, e.g. `#/mamma/nuova`. */
-export function navigate(hash: string): void {
+/** Navigate to a hash route, e.g. `#/mamma/nuova`; `replace` swaps the current history entry. */
+export function navigate(hash: string, opts: { replace?: boolean } = {}): void {
   const h = hash.startsWith('#') ? hash : `#${hash}`;
   if (location.hash === h) return;
-  location.hash = h;
+  if (opts.replace) location.replace(h);
+  else location.hash = h;
 }

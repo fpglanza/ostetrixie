@@ -2,7 +2,7 @@ import { diffDays, formatShort, weekdayIT, type ISODate } from './dates';
 import type { RigaMamma } from './overview';
 import type { Incontro } from './types';
 
-const TIPO: Record<Incontro['tipo'], string> = {
+export const TIPO: Record<Incontro['tipo'], string> = {
   controllo: 'Controllo',
   accompagnamento: 'Accompagnamento',
   puerperio: 'Puerperio',

@@ -1,26 +1,37 @@
 <script lang="ts">
   import TabBar from './components/TabBar.svelte';
+  import MammaForm from './routes/MammaForm.svelte';
   import Mamme from './routes/Mamme.svelte';
+  import Scheda from './routes/Scheda.svelte';
   import { router } from './lib/router.svelte';
   import type { RouteName } from './lib/routes';
 
   // Placeholder titles for screens built by later tasks.
-  const TITOLI: Record<Exclude<RouteName, 'mamme'>, string> = {
-    mammaNuova: 'Nuova mamma',
-    scheda: 'Scheda mamma',
-    mammaModifica: 'Modifica mamma',
+  const TITOLI: Record<Exclude<RouteName, 'mamme' | 'mammaNuova' | 'scheda' | 'mammaModifica'>, string> = {
     incontroNuovo: 'Nuovo incontro',
     incontro: 'Incontro',
     calendario: 'Calendario',
     impostazioni: 'Impostazioni',
     aiuto: 'Aiuto',
   };
+
+  // A new screen starts at the top.
+  $effect(() => {
+    void router.path;
+    window.scrollTo(0, 0);
+  });
 </script>
 
 <div class="statusbar" aria-hidden="true"></div>
 
 {#if router.name === 'mamme'}
   <Mamme />
+{:else if router.name === 'mammaNuova'}
+  <MammaForm />
+{:else if router.name === 'mammaModifica'}
+  {#key router.params.id}<MammaForm id={router.params.id} />{/key}
+{:else if router.name === 'scheda'}
+  {#key router.params.id}<Scheda id={router.params.id} />{/key}
 {:else}
   <header class="ph">
     <h1>{TITOLI[router.name]}</h1>
