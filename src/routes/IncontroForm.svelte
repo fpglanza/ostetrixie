@@ -1,3 +1,8 @@
+<script lang="ts" module>
+  /** Set by "Salva e copia" on a new incontro: the edit screen it opens shows the copy sheet. */
+  let copiaDopoSalvataggio: string | null = null;
+</script>
+
 <script lang="ts">
   import { tick } from 'svelte';
   import ConfirmDialog from '../components/ConfirmDialog.svelte';
@@ -77,6 +82,11 @@
       base = { ...f };
       misureAperte = f.tipo === 'controllo' || haMisure(f);
       destinatari = destinatariCopia(await getAllData(), ctx.mamma.id, today);
+      if (inc && copiaDopoSalvataggio === inc.incontro.id) {
+        copiaDopoSalvataggio = null;
+        scelti = [];
+        foglio = 'copia';
+      }
     })();
   });
 
@@ -145,8 +155,15 @@
 
   async function apriCopia() {
     if (salvando) return;
-    if (nuovo || unsaved.dirty) {
+    const eraNuovo = nuovo;
+    if (eraNuovo || unsaved.dirty) {
       if (!(await scrivi())) return;
+    }
+    if (eraNuovo) {
+      // Become the edit screen, so a reload or a second save cannot duplicate the record.
+      copiaDopoSalvataggio = salvatoId!;
+      navigate(`#/incontro/${encodeURIComponent(salvatoId!)}`, { replace: true });
+      return;
     }
     scelti = [];
     foglio = 'copia';
