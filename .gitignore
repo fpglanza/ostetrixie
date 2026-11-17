@@ -1,0 +1,7 @@
+.superpowers/
+.impeccable/config.local.json
+.impeccable/questions/
+.impeccable/review/
+node_modules/
+dist/
+.DS_Store
