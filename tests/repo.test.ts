@@ -42,6 +42,20 @@ describe('repo', () => {
     expect(await getMammaDetail('nope')).toBeNull();
   });
 
+  it('nuovaGravidanza closes the in_corso one without a birth date, leaving exactly one in_corso', async () => {
+    const { mamma, gravidanza } = await createMamma({ nome: 'A', archiviata: false }, { upm: '2026-03-20' });
+    const done = await nuovaGravidanza(mamma.id, { upm: '2025-01-01' });
+    await updateGravidanza(done.id, { dataParto: '2025-10-01' });
+    const g3 = await nuovaGravidanza(mamma.id, { upm: '2027-01-01' });
+    const all = await db.gravidanze.where('mammaId').equals(mamma.id).toArray();
+    const byId = Object.fromEntries(all.map((g) => [g.id, g]));
+    expect(byId[gravidanza.id].stato).toBe('conclusa');
+    expect(byId[gravidanza.id].dataParto).toBeUndefined();
+    expect(byId[done.id]).toMatchObject({ stato: 'conclusa', dataParto: '2025-10-01' });
+    expect(byId[g3.id].stato).toBe('in_corso');
+    expect(all.filter((g) => g.stato === 'in_corso').map((g) => g.id)).toEqual([g3.id]);
+  });
+
   it('nuovaGravidanza lists newest first', async () => {
     const { mamma, gravidanza } = await createMamma({ nome: 'A', archiviata: false }, {});
     const g2 = await nuovaGravidanza(mamma.id, { upm: '2027-01-01' });

@@ -61,18 +61,28 @@ export async function updateGravidanza(
   });
 }
 
+/** Starts a new pregnancy; any in_corso one is closed (conclusa, no birth date) in the same transaction. */
 export async function nuovaGravidanza(mammaId: string, g: GravidanzaInput): Promise<Gravidanza> {
-  const t = now();
-  const gravidanza: Gravidanza = {
-    ...g,
-    id: newId(),
-    mammaId,
-    stato: 'in_corso',
-    createdAt: t,
-    updatedAt: t
-  };
-  await db.gravidanze.add(gravidanza);
-  return gravidanza;
+  return db.transaction('rw', db.gravidanze, async () => {
+    const t = now();
+    const aperte = await db.gravidanze
+      .where('mammaId')
+      .equals(mammaId)
+      .filter((x) => x.stato === 'in_corso')
+      .toArray();
+    for (const x of aperte) await db.gravidanze.put({ ...x, stato: 'conclusa', updatedAt: t });
+    const tNuova = now(); // strictly after t, so the new one sorts newest
+    const gravidanza: Gravidanza = {
+      ...g,
+      id: newId(),
+      mammaId,
+      stato: 'in_corso',
+      createdAt: tNuova,
+      updatedAt: tNuova
+    };
+    await db.gravidanze.add(gravidanza);
+    return gravidanza;
+  });
 }
 
 export async function deleteMamma(id: string): Promise<void> {

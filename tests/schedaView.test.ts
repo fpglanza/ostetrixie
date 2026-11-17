@@ -51,6 +51,11 @@ describe('gravidanzeScheda', () => {
     const c = grav('2026-02', { stato: 'conclusa' });
     expect(gravidanzeScheda([a, c])).toEqual({ corrente: c, precedenti: [a] });
   });
+  it('keeps the newest as current once it is concluded next to an older concluded one', () => {
+    const vecchia = grav('2025-01', { stato: 'conclusa' });
+    const nuova = grav('2026-02', { stato: 'conclusa', dataParto: '2026-11-15' });
+    expect(gravidanzeScheda([nuova, vecchia])).toEqual({ corrente: nuova, precedenti: [vecchia] });
+  });
   it('handles no pregnancies', () => {
     expect(gravidanzeScheda([])).toEqual({ corrente: null, precedenti: [] });
   });

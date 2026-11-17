@@ -288,7 +288,7 @@
 
   <Sheet open={foglio === 'gravidanza'} titolo="Nuova gravidanza" onclose={chiudi}>
     {#if g && !g.dataParto}
-      <p class="nota">La gravidanza attuale passerà tra le precedenti.</p>
+      <p class="nota">La gravidanza attuale sarà chiusa senza data del parto e passerà tra le precedenti.</p>
     {/if}
     <CampiGravidanza bind:upm={nuova.upm} bind:dppEco={nuova.dppEco} bind:anamnesiOstetrica={nuova.anamnesiOstetrica} {today} />
     <div class="azioni">
