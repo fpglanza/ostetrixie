@@ -8,3 +8,4 @@ dist/
 *.local
 *.tsbuildinfo
 .impeccable/hook.cache.json
+.claude/
