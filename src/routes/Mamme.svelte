@@ -2,11 +2,22 @@
   import { liveQuery } from 'dexie';
   import StationLine from '../components/StationLine.svelte';
   import { formatShort, todayISO, weekdayIT } from '../lib/dates';
-  import { buildRighe, ordinaRighe, type RigaMamma } from '../lib/overview';
+  import { buildRighe, ordinaRighe, type OverviewData, type RigaMamma } from '../lib/overview';
   import { descriviProssimo, filtraPerNome, rigaVicina } from '../lib/mammeView';
   import { getAllData } from '../lib/repo';
 
-  const dati = liveQuery(() => getAllData());
+  let dati = $state<OverviewData | null>(null);
+  let errore = $state(false);
+  $effect(() => {
+    const sub = liveQuery(() => getAllData()).subscribe({
+      next: (d) => {
+        dati = d;
+        errore = false;
+      },
+      error: () => (errore = true),
+    });
+    return () => sub.unsubscribe();
+  });
 
   let today = $state(todayISO());
   $effect(() => {
@@ -20,13 +31,14 @@
   let cerca = $state('');
   let archivioAperto = $state(false);
 
-  const righe = $derived($dati ? ordinaRighe(buildRighe($dati, today)) : null);
+  const righe = $derived(dati ? ordinaRighe(buildRighe(dati, today)) : null);
   const filtrate = $derived(righe ? filtraPerNome(righe, cerca) : []);
   const inGravidanza = $derived(filtrate.filter((r) => r.sezione === 'in_gravidanza'));
   const dopoParto = $derived(filtrate.filter((r) => r.sezione === 'dopo_parto'));
   const archiviate = $derived(filtrate.filter((r) => r.sezione === 'archiviata'));
   const vicina = $derived(righe ? rigaVicina(righe, today) : null);
   const vuoto = $derived(righe !== null && righe.length === 0);
+  const archivioVisibile = $derived(archivioAperto || cerca.trim() !== '');
 
   const seed = import.meta.env.DEV
     ? async () => (await import('../lib/devSeed')).seedDemo()
@@ -34,9 +46,10 @@
 </script>
 
 {#snippet riga(r: RigaMamma)}
-  <a class="row" class:vicina={r.mammaId === vicina} class:post={r.sezione === 'dopo_parto'} href="#/mamma/{encodeURIComponent(r.mammaId)}">
+  {@const post = r.sezione === 'dopo_parto' || (r.sezione === 'archiviata' && !!r.dataParto)}
+  <a class="row" class:vicina={r.mammaId === vicina} class:post href="#/mamma/{encodeURIComponent(r.mammaId)}">
     <div class="eg num">
-      {#if r.sezione === 'dopo_parto' || (r.sezione === 'archiviata' && r.dataParto)}
+      {#if post}
         {r.postParto ? r.postParto.replace(/^parto /, '') : '—'}<small>dal parto</small>
       {:else if r.upmMancante}
         <span class="manca">UPM mancante</span>
@@ -81,7 +94,7 @@
     <h1>Mamme</h1>
     <div class="data">{weekdayIT(today)}<b class="num">{formatShort(today)}</b></div>
   </div>
-  {#if !vuoto}
+  {#if !vuoto && !errore}
     <label class="cerca">
       <span class="sr">Cerca per nome</span>
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -94,7 +107,9 @@
 </header>
 
 <main>
-  {#if vuoto}
+  {#if errore}
+    <p class="nessuno">Impossibile leggere i dati su questo dispositivo.</p>
+  {:else if vuoto}
     <div class="vuoto">
       <p>Nessuna mamma ancora: aggiungi la prima.</p>
       {@render nuovaMamma('pill')}
@@ -120,14 +135,14 @@
 
     {#if archiviate.length}
       <h2 class="sez">
-        <button type="button" class="toggle" aria-expanded={archivioAperto} onclick={() => (archivioAperto = !archivioAperto)}>
+        <button type="button" class="toggle" aria-expanded={archivioVisibile} onclick={() => (archivioAperto = !archivioAperto)}>
           Archiviate <span class="num">{archiviate.length}</span>
-          <svg viewBox="0 0 12 12" aria-hidden="true" class:aperto={archivioAperto}>
+          <svg viewBox="0 0 12 12" aria-hidden="true" class:aperto={archivioVisibile}>
             <path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </button>
       </h2>
-      {#if archivioAperto}
+      {#if archivioVisibile}
         {#each archiviate as r (r.mammaId)}
           {@render riga(r)}
         {/each}
@@ -136,7 +151,7 @@
   {/if}
 </main>
 
-{#if righe && !vuoto}
+{#if righe && !vuoto && !errore}
   {@render nuovaMamma('pill fab')}
 {/if}
 
@@ -247,13 +262,13 @@
     -webkit-tap-highlight-color: transparent;
   }
   .row:active {
-    background: #f6f4ec;
+    background: var(--premuto);
   }
   .row:focus-visible {
     outline-offset: -2px;
   }
   .row.vicina {
-    background: #fff8d6;
+    background: var(--vicina);
   }
   .eg {
     font-size: 34px;

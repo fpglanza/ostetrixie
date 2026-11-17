@@ -37,6 +37,10 @@ describe('rigaVicina', () => {
   it('includes a DPP already passed, by distance', () => {
     expect(rigaVicina([riga('a', { dpp: '2026-11-15' }), riga('b', { dpp: '2026-11-21' })], T)).toBe('a');
   });
+  it('ignores a DPP passed more than 14 days ago', () => {
+    expect(rigaVicina([riga('a', { dpp: '2026-10-18' })], T)).toBeNull();
+    expect(rigaVicina([riga('a', { dpp: '2026-11-03' })], T)).toBe('a');
+  });
   it('returns null when nobody is within 14 days', () => {
     expect(rigaVicina([riga('a', { dpp: '2026-12-02' }), riga('b')], T)).toBeNull();
     expect(rigaVicina([riga('a', { dpp: '2026-12-01' })], T)).toBe('a');

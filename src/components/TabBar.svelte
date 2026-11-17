@@ -40,7 +40,7 @@
     bottom: 0;
     z-index: 10;
     height: var(--tabbar-h);
-    padding: 8px max(env(safe-area-inset-right), 0px) env(safe-area-inset-bottom) max(env(safe-area-inset-left), 0px);
+    padding: 6px max(env(safe-area-inset-right), 0px) env(safe-area-inset-bottom) max(env(safe-area-inset-left), 0px);
     border-top: 2px solid var(--ink);
     background: var(--carta);
     display: grid;
@@ -48,12 +48,13 @@
     align-items: start;
   }
   a {
-    min-height: 52px;
+    min-height: 44px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     font-size: 12px;
+    line-height: 14px;
     font-weight: 700;
     color: var(--grigio);
     text-decoration: none;

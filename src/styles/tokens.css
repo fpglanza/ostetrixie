@@ -7,7 +7,9 @@
   --grigio: #5C5C5C;
   --filo: #E3E0D6;
   --font: 'Archivo Variable', system-ui, sans-serif;
-  --tabbar-h: max(84px, calc(60px + env(safe-area-inset-bottom)));
+  --vicina: #FFF8D6;
+  --premuto: #F6F4EC;
+  --tabbar-h: max(84px, calc(50px + env(safe-area-inset-bottom)));
 }
 
 * {

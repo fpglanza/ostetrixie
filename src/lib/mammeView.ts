@@ -17,14 +17,14 @@ export function descriviProssimo(i: Incontro, today: ISODate): string {
   return [TIPO[i.tipo], quando, i.ora].filter(Boolean).join(' ');
 }
 
-/** mammaId of the pregnant mamma nearest her DPP, if within 14 days (or past it). */
+/** mammaId of the pregnant mamma nearest her DPP, if within 14 days either side. */
 export function rigaVicina(righe: RigaMamma[], today: ISODate): string | null {
   let best: { id: string; dist: number } | null = null;
   for (const r of righe) {
     if (r.sezione !== 'in_gravidanza' || !r.dpp) continue;
     const giorni = diffDays(today, r.dpp);
-    if (giorni > VICINA_GIORNI) continue;
     const dist = Math.abs(giorni);
+    if (dist > VICINA_GIORNI) continue;
     if (!best || dist < best.dist) best = { id: r.mammaId, dist };
   }
   return best?.id ?? null;
