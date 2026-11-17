@@ -54,3 +54,8 @@ export function weekdayIT(d: ISODate, short = false): string {
   const name = GIORNI[new Date(parse(d)).getUTCDay()];
   return short ? name.slice(0, 3) : name;
 }
+
+/** ISO weekday of `d`: 1 = Monday … 7 = Sunday. */
+export function isoWeekday(d: ISODate): number {
+  return new Date(parse(d)).getUTCDay() || 7;
+}

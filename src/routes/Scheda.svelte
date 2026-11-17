@@ -3,8 +3,10 @@
   import CampiGravidanza from '../components/CampiGravidanza.svelte';
   import ConfirmDialog from '../components/ConfirmDialog.svelte';
   import Sheet from '../components/Sheet.svelte';
+  import Orario from '../components/Orario.svelte';
+  import RigaOrario from '../components/RigaOrario.svelte';
   import StationLine from '../components/StationLine.svelte';
-  import { formatIT, formatShort, todayISO, weekdayIT } from '../lib/dates';
+  import { formatIT, formatShort, todayISO } from '../lib/dates';
   import { descriviProssimo } from '../lib/mammeView';
   import { dppEffettiva, dppFromUpm, egAt, formatEG, postPartumAt } from '../lib/obstetrics';
   import { deleteMamma, getMammaDetail, nuovaGravidanza, updateGravidanza, updateMamma } from '../lib/repo';
@@ -105,43 +107,38 @@
   {#if lista.length === 0}
     <p class="vuoto">Nessun incontro.</p>
   {:else}
-    <div class="cols" aria-hidden="true"><span>N.</span><span>Data</span><span>Epoca</span><span>Incontro</span></div>
-    <ol class="incontri">
+    <Orario colonne={['N.', 'Data', 'Epoca', 'Incontro']} conN>
       {#each lista as r (r.incontro.id)}
-        <li>
-          <a class="riga" class:alert={r.daRegistrare} href="#/incontro/{encodeURIComponent(r.incontro.id)}">
-            <span class="n num">{r.n}</span>
-            <span class="quando num">
-              <b>{formatShort(r.incontro.data)}</b>
-              <small>{weekdayIT(r.incontro.data, true)}{r.incontro.ora ? ' ' + r.incontro.ora : ''}</small>
-            </span>
-            <span class="epoca num" class:fuori={r.fuoriRange}>{r.epoca ?? '—'}</span>
-            <span class="cosa">
-              <b>{r.tipo}</b>
-              <small>
-                {#if r.daRegistrare}
-                  da registrare
-                {:else if r.programmato}
-                  in programma
-                {:else}
-                  {#if r.sf}<span>{r.sf}</span>{/if}
-                  {#if r.sf && r.partner}<span aria-hidden="true"> · </span>{/if}
-                  {#if r.partner}
-                    <span class="partner">
-                      partner
-                      <svg viewBox="0 0 14 14" aria-label="presente" role="img">
-                        <path d="M2.5 7.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-                      </svg>
-                    </span>
-                  {/if}
-                  {#if !r.sf && !r.partner}fatto{/if}
-                {/if}
-              </small>
-            </span>
-          </a>
-        </li>
+        <RigaOrario
+          href="#/incontro/{encodeURIComponent(r.incontro.id)}"
+          n={r.n}
+          data={r.incontro.data}
+          ora={r.incontro.ora}
+          epoca={r.epoca}
+          fuoriRange={r.fuoriRange}
+          alert={r.daRegistrare}
+          titolo={r.tipo}
+        >
+          {#if r.daRegistrare}
+            da registrare
+          {:else if r.programmato}
+            in programma
+          {:else}
+            {#if r.sf}<span>{r.sf}</span>{/if}
+            {#if r.sf && r.partner}<span aria-hidden="true"> · </span>{/if}
+            {#if r.partner}
+              <span class="partner">
+                partner
+                <svg viewBox="0 0 14 14" aria-label="presente" role="img">
+                  <path d="M2.5 7.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            {/if}
+            {#if !r.sf && !r.partner}fatto{/if}
+          {/if}
+        </RigaOrario>
       {/each}
-    </ol>
+    </Orario>
   {/if}
 {/snippet}
 
@@ -464,7 +461,6 @@
   }
   .etichetta,
   .sez,
-  .cols,
   .anamnesi summary,
   .testa-incontri h2 {
     font-size: 12px;
@@ -541,77 +537,6 @@
     font-size: 15px;
   }
 
-  .cols,
-  .riga {
-    display: grid;
-    grid-template-columns: 26px 52px 58px 1fr;
-    gap: 8px;
-  }
-  .cols {
-    padding: 7px 18px;
-    border-top: 2px solid var(--ink);
-    border-bottom: 1px solid var(--filo);
-  }
-  .incontri {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .riga {
-    padding: 11px 18px 10px;
-    min-height: 56px;
-    border-bottom: 1px solid var(--filo);
-    align-items: start;
-    color: inherit;
-    text-decoration: none;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .riga:active {
-    background: var(--premuto);
-  }
-  .riga:focus-visible {
-    outline-offset: -2px;
-  }
-  .n {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--grigio);
-    line-height: 22px;
-  }
-  .quando b,
-  .epoca {
-    font-size: 20px;
-    font-weight: 800;
-    line-height: 22px;
-  }
-  .quando b {
-    display: block;
-  }
-  .quando small,
-  .cosa small {
-    display: block;
-    font-size: 12px;
-    color: var(--grigio);
-    margin-top: 2px;
-  }
-  .quando small {
-    white-space: nowrap;
-  }
-  .epoca.fuori {
-    color: var(--rosso);
-  }
-  .cosa {
-    min-width: 0;
-  }
-  .cosa b {
-    display: block;
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 22px;
-  }
-  .cosa small {
-    font-size: 13px;
-  }
   .partner {
     display: inline-flex;
     align-items: center;
@@ -622,14 +547,6 @@
   .partner svg {
     width: 14px;
     height: 14px;
-  }
-  .riga.alert .quando b,
-  .riga.alert .quando small,
-  .riga.alert .cosa small {
-    color: var(--rosso);
-  }
-  .riga.alert .cosa small {
-    font-weight: 700;
   }
   .vuoto {
     margin: 0;
