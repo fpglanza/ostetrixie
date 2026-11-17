@@ -1,15 +1,16 @@
 <script lang="ts">
+  import ConfirmDialog from './components/ConfirmDialog.svelte';
   import TabBar from './components/TabBar.svelte';
+  import IncontroForm from './routes/IncontroForm.svelte';
   import MammaForm from './routes/MammaForm.svelte';
   import Mamme from './routes/Mamme.svelte';
   import Scheda from './routes/Scheda.svelte';
   import { router } from './lib/router.svelte';
   import type { RouteName } from './lib/routes';
+  import { rispondiUscita, uscita } from './lib/unsaved.svelte';
 
   // Placeholder titles for screens built by later tasks.
-  const TITOLI: Record<Exclude<RouteName, 'mamme' | 'mammaNuova' | 'scheda' | 'mammaModifica'>, string> = {
-    incontroNuovo: 'Nuovo incontro',
-    incontro: 'Incontro',
+  const TITOLI: Record<Exclude<RouteName, 'mamme' | 'mammaNuova' | 'scheda' | 'mammaModifica' | 'incontroNuovo' | 'incontro'>, string> = {
     calendario: 'Calendario',
     impostazioni: 'Impostazioni',
     aiuto: 'Aiuto',
@@ -32,6 +33,10 @@
   {#key router.params.id}<MammaForm id={router.params.id} />{/key}
 {:else if router.name === 'scheda'}
   {#key router.params.id}<Scheda id={router.params.id} />{/key}
+{:else if router.name === 'incontroNuovo'}
+  {#key router.params.gid}<IncontroForm gid={router.params.gid} />{/key}
+{:else if router.name === 'incontro'}
+  {#key router.params.id}<IncontroForm id={router.params.id} />{/key}
 {:else}
   <header class="ph">
     <h1>{TITOLI[router.name]}</h1>
@@ -40,6 +45,16 @@
 {/if}
 
 <TabBar />
+
+<ConfirmDialog
+  open={uscita.chiede}
+  titolo="Uscire senza salvare?"
+  testo="Le modifiche non salvate andranno perse."
+  conferma="Esci senza salvare"
+  pericoloso
+  onconferma={() => rispondiUscita(true)}
+  onannulla={() => rispondiUscita(false)}
+/>
 
 <style>
   .statusbar {

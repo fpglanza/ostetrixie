@@ -7,6 +7,8 @@ import {
   deleteIncontro,
   deleteMamma,
   getAllData,
+  getGravidanzaContext,
+  getIncontroContext,
   getMammaDetail,
   nuovaGravidanza,
   saveIncontro,
@@ -143,5 +145,23 @@ describe('repo', () => {
 
   it('getImpostazioni defaults on empty DB', async () => {
     expect(await getImpostazioni()).toEqual({ id: 'main', timeoutMinuti: 5 });
+  });
+
+  it('getIncontroContext returns the incontro with its gravidanza and mamma', async () => {
+    const { mamma, gravidanza } = await createMamma({ nome: 'Anna', archiviata: false }, { upm: '2026-01-01' });
+    const inc = await saveIncontro({ ...incontroBase, gravidanzaId: gravidanza.id });
+    const ctx = await getIncontroContext(inc.id);
+    expect(ctx?.incontro.id).toBe(inc.id);
+    expect(ctx?.gravidanza.id).toBe(gravidanza.id);
+    expect(ctx?.mamma.id).toBe(mamma.id);
+    expect(await getIncontroContext('nope')).toBeNull();
+  });
+
+  it('getGravidanzaContext returns gravidanza and mamma, null when unknown', async () => {
+    const { mamma, gravidanza } = await createMamma({ nome: 'Anna', archiviata: false }, {});
+    const ctx = await getGravidanzaContext(gravidanza.id);
+    expect(ctx?.mamma.id).toBe(mamma.id);
+    expect(ctx?.gravidanza.id).toBe(gravidanza.id);
+    expect(await getGravidanzaContext('nope')).toBeNull();
   });
 });

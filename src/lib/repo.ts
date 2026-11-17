@@ -170,3 +170,21 @@ export async function getAllData(): Promise<{
   ]);
   return { mamme, gravidanze, incontri };
 }
+
+/** A pregnancy with its mamma, or null when either is missing. */
+export async function getGravidanzaContext(
+  gid: string,
+): Promise<{ gravidanza: Gravidanza; mamma: Mamma } | null> {
+  const gravidanza = await db.gravidanze.get(gid);
+  const mamma = gravidanza && (await db.mamme.get(gravidanza.mammaId));
+  return gravidanza && mamma ? { gravidanza, mamma } : null;
+}
+
+/** An incontro with the pregnancy and mamma it belongs to, or null when any is missing. */
+export async function getIncontroContext(
+  id: string,
+): Promise<{ incontro: Incontro; gravidanza: Gravidanza; mamma: Mamma } | null> {
+  const incontro = await db.incontri.get(id);
+  const ctx = incontro && (await getGravidanzaContext(incontro.gravidanzaId));
+  return incontro && ctx ? { incontro, ...ctx } : null;
+}
