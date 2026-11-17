@@ -46,3 +46,11 @@ export function isValidISODate(s: string): boolean {
   if (!m) return false;
   return fmt(Date.UTC(+m[1], +m[2] - 1, +m[3])) === s;
 }
+
+const GIORNI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+
+/** Italian weekday name of `d` ("martedì"), or its 3-letter form ("mar") when `short`. */
+export function weekdayIT(d: ISODate, short = false): string {
+  const name = GIORNI[new Date(parse(d)).getUTCDay()];
+  return short ? name.slice(0, 3) : name;
+}

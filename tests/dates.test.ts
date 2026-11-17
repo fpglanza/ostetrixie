@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { addDays, diffDays, formatIT, formatShort, isValidISODate, todayISO } from '../src/lib/dates';
+import { addDays, diffDays, formatIT, formatShort, isValidISODate, todayISO, weekdayIT } from '../src/lib/dates';
 
 describe('dates', () => {
   it('diffDays is DST-safe', () => {
@@ -26,5 +26,14 @@ describe('dates', () => {
     expect(isValidISODate('2026-02-30')).toBe(false);
     expect(isValidISODate('2026-2-3')).toBe(false);
     expect(isValidISODate('')).toBe(false);
+  });
+});
+
+describe('weekdayIT', () => {
+  it('names the weekday of a date in Italian, full or short', () => {
+    expect(weekdayIT('2026-11-17')).toBe('martedì');
+    expect(weekdayIT('2026-11-20', true)).toBe('ven');
+    expect(weekdayIT('2026-11-30', true)).toBe('lun');
+    expect(weekdayIT('2026-11-22')).toBe('domenica');
   });
 });
