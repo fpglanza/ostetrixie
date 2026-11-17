@@ -2,6 +2,7 @@
   import ConfirmDialog from './components/ConfirmDialog.svelte';
   import TabBar from './components/TabBar.svelte';
   import Calendario from './routes/Calendario.svelte';
+  import Impostazioni from './routes/Impostazioni.svelte';
   import IncontroForm from './routes/IncontroForm.svelte';
   import MammaForm from './routes/MammaForm.svelte';
   import Mamme from './routes/Mamme.svelte';
@@ -11,8 +12,7 @@
   import { rispondiUscita, uscita } from './lib/unsaved.svelte';
 
   // Placeholder titles for screens built by later tasks.
-  const TITOLI: Record<Exclude<RouteName, 'mamme' | 'mammaNuova' | 'scheda' | 'mammaModifica' | 'incontroNuovo' | 'incontro' | 'calendario'>, string> = {
-    impostazioni: 'Impostazioni',
+  const TITOLI: Record<Exclude<RouteName, 'mamme' | 'mammaNuova' | 'scheda' | 'mammaModifica' | 'incontroNuovo' | 'incontro' | 'calendario' | 'impostazioni'>, string> = {
     aiuto: 'Aiuto',
   };
 
@@ -39,6 +39,8 @@
   {#key router.params.id}<IncontroForm id={router.params.id} />{/key}
 {:else if router.name === 'calendario'}
   <Calendario />
+{:else if router.name === 'impostazioni'}
+  <Impostazioni />
 {:else}
   <header class="ph">
     <h1>{TITOLI[router.name]}</h1>

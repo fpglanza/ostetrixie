@@ -1,8 +1,10 @@
 <script lang="ts">
   import { liveQuery } from 'dexie';
+  import BackupBanner from '../components/BackupBanner.svelte';
   import StationLine from '../components/StationLine.svelte';
   import { formatShort, todayISO, weekdayIT } from '../lib/dates';
-  import { buildRighe, ordinaRighe, type OverviewData, type RigaMamma } from '../lib/overview';
+  import { getImpostazioni } from '../lib/db';
+  import { buildRighe, ordinaRighe, serveBackup, type OverviewData, type RigaMamma } from '../lib/overview';
   import { descriviProssimo, filtraPerNome, rigaVicina } from '../lib/mammeView';
   import { getAllData } from '../lib/repo';
 
@@ -15,6 +17,14 @@
         errore = false;
       },
       error: () => (errore = true),
+    });
+    return () => sub.unsubscribe();
+  });
+
+  let ultimoBackup = $state<string | undefined>(undefined);
+  $effect(() => {
+    const sub = liveQuery(() => getImpostazioni()).subscribe({
+      next: (imp) => (ultimoBackup = imp.ultimoBackup),
     });
     return () => sub.unsubscribe();
   });
@@ -39,6 +49,7 @@
   const vicina = $derived(righe ? rigaVicina(righe, today) : null);
   const vuoto = $derived(righe !== null && righe.length === 0);
   const archivioVisibile = $derived(archivioAperto || cerca.trim() !== '');
+  const mostraBackup = $derived(!!dati && !errore && serveBackup(ultimoBackup, dati.mamme.length > 0, today));
 
   const seed = import.meta.env.DEV
     ? async () => (await import('../lib/devSeed')).seedDemo()
@@ -94,6 +105,9 @@
     <h1>Mamme</h1>
     <div class="data">{weekdayIT(today)}<b class="num">{formatShort(today)}</b></div>
   </div>
+  {#if mostraBackup}
+    <BackupBanner {ultimoBackup} {today} />
+  {/if}
   {#if !vuoto && !errore}
     <label class="cerca">
       <span class="sr">Cerca per nome</span>
