@@ -10,6 +10,8 @@
   --vicina: #FFF8D6;
   /* The phone column: on wider screens the app stays this wide, centred. */
   --col: 480px;
+  /* Mamme's docked "Nuova mamma" strip: 44px pill + 2×4px + 1px hairline. */
+  --dock-h: 53px;
   --premuto: #F6F4EC;
   --tabbar-base: max(84px, calc(50px + env(safe-area-inset-bottom)));
   /* Height of the update banner above the tab bar; UpdateBanner sets it while shown. */
@@ -54,12 +56,8 @@ textarea {
   margin: 0 auto;
 }
 @media (min-width: 520px) {
-  body {
-    background: var(--premuto);
-  }
   [data-contenuto] {
     min-height: 100dvh;
-    background: var(--carta);
   }
   [data-contenuto]::after {
     content: '';

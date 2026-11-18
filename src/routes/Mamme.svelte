@@ -47,6 +47,16 @@
   const inGravidanza = $derived(filtrate.filter((r) => r.sezione === 'in_gravidanza'));
   const dopoParto = $derived(filtrate.filter((r) => r.sezione === 'dopo_parto'));
   const archiviate = $derived(filtrate.filter((r) => r.sezione === 'archiviata'));
+  /** Footer count: "4 in gravidanza · 1 dopo il parto", parts at 0 left out. */
+  const conteggio = $derived.by(() => {
+    if (!righe) return [];
+    const n = (s: RigaMamma['sezione']) => righe.filter((r) => r.sezione === s).length;
+    const parti: [number, string][] = [
+      [n('in_gravidanza'), 'in gravidanza'],
+      [n('dopo_parto'), 'dopo il parto'],
+    ];
+    return parti.filter(([k]) => k > 0).map(([k, t]) => `${k} ${t}`);
+  });
   const vicina = $derived(righe ? rigaVicina(righe, today) : null);
   const vuoto = $derived(righe !== null && righe.length === 0);
   const archivioVisibile = $derived(archivioAperto || cerca.trim() !== '');
@@ -167,7 +177,13 @@
 </main>
 
 {#if righe && !vuoto && !errore}
-  <div class="dock">{@render nuovaMamma('pill')}</div>
+  <div class="dock">
+    <!-- Each part stays whole: on a phone the line breaks between parts, never inside one. -->
+    <p class="conteggio num">
+      {#each conteggio as parte, i (parte)}<span>{parte}{i < conteggio.length - 1 ? ' ·' : ''}</span>{' '}{/each}
+    </p>
+    {@render nuovaMamma('pill')}
+  </div>
 {/if}
 
 <style>
@@ -265,8 +281,9 @@
     text-align: right;
   }
 
+  /* Exactly the docked strip (44px pill + 2×4px + 1px rule) above the tab bar. */
   main {
-    padding-bottom: calc(var(--tabbar-h) + 96px);
+    padding-bottom: calc(var(--tabbar-h) + var(--dock-h));
   }
   .row {
     padding: 12px 18px 11px;
@@ -437,12 +454,26 @@
     max-width: var(--col);
     margin: 0 auto;
     display: flex;
-    justify-content: flex-end;
-    padding: 8px calc(16px + env(safe-area-inset-right)) 8px calc(16px + env(safe-area-inset-left));
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: var(--dock-h);
+    padding: 4px calc(16px + env(safe-area-inset-right)) 4px calc(18px + env(safe-area-inset-left));
     background: var(--carta);
     border-top: 1px solid var(--filo);
   }
   .dock .pill {
-    min-height: 48px;
+    flex: none;
+    min-height: 44px;
+  }
+  .conteggio {
+    min-width: 0;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.15;
+  }
+  .conteggio span {
+    white-space: nowrap;
   }
 </style>
