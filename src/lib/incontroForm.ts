@@ -2,7 +2,7 @@ import { isValidISODate, type ISODate } from './dates';
 import { egAt, formatEG, postPartumAt } from './obstetrics';
 import { buildRighe, currentGravidanza, ordinaRighe, type OverviewData } from './overview';
 import type { IncontroInput } from './repo';
-import { testo } from './schedaView';
+import { numeroIT, testo } from './schedaView';
 import type { Gravidanza, Incontro } from './types';
 
 /** The incontro form as typed: every field is a string except the choices. */
@@ -46,8 +46,6 @@ export function formNuovo(g: Pick<Gravidanza, 'dataParto'>, today: ISODate): For
   };
 }
 
-const numTesto = (n: number | undefined) => (n == null ? '' : String(n).replace('.', ','));
-
 export function formDaIncontro(i: Incontro): FormIncontro {
   return {
     data: i.data,
@@ -57,8 +55,8 @@ export function formDaIncontro(i: Incontro): FormIncontro {
     argomento: i.argomento ?? '',
     partner: i.partnerPresente,
     attivita: i.attivita ?? '',
-    sf: numTesto(i.sinfisiFondoCm),
-    peso: numTesto(i.pesoKg),
+    sf: numeroIT(i.sinfisiFondoCm),
+    peso: numeroIT(i.pesoKg),
     pressione: i.pressione ?? '',
     bcf: i.bcf ?? '',
     note: i.note ?? '',
@@ -106,9 +104,9 @@ export function aIncontroInput(
   };
 }
 
-/** Whether the form differs from what was loaded, ignoring surrounding whitespace. */
-export function isDirty(f: FormIncontro, base: FormIncontro): boolean {
-  return (Object.keys(base) as (keyof FormIncontro)[]).some((k) => f[k].trim() !== base[k].trim());
+/** Whether a form of text fields differs from what was loaded, ignoring surrounding whitespace. */
+export function isDirty<F extends { [K in keyof F]: string }>(f: F, base: F): boolean {
+  return (Object.keys(base) as (keyof F)[]).some((k) => f[k].trim() !== base[k].trim());
 }
 
 /** Live line under the date: EG at that date, time since birth, or what is missing. */

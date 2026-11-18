@@ -78,6 +78,10 @@ describe('righeIncontri', () => {
     const [r] = righeIncontri([inc('a', '2026-11-10', { sinfisiFondoCm: 33, partnerPresente: 'si' })], g, T);
     expect(r).toMatchObject({ epoca: '33+4', fuoriRange: false, tipo: 'Controllo', sf: 'SF 33 cm', partner: true, daRegistrare: false });
   });
+  it('writes SF with the Italian decimal comma', () => {
+    const [r] = righeIncontri([inc('a', '2026-11-10', { sinfisiFondoCm: 33.5 })], g, T);
+    expect(r.sf).toBe('SF 33,5 cm');
+  });
   it('marks a past programmato as da registrare, a future one not', () => {
     const r = righeIncontri(
       [inc('old', '2026-11-16', { stato: 'programmato' }), inc('new', T, { stato: 'programmato', tipo: 'accompagnamento' })], g, T);

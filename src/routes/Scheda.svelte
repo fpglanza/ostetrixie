@@ -11,8 +11,11 @@
   import { dppEffettiva, dppFromUpm, egAt, formatEG, postPartumAt } from '../lib/obstetrics';
   import { deleteMamma, getMammaDetail, nuovaGravidanza, updateGravidanza, updateMamma } from '../lib/repo';
   import { navigate } from '../lib/router.svelte';
+  import { isDirty } from '../lib/incontroForm';
+  import { erroreData, erroriGravidanza, type ErroriGravidanza } from '../lib/mammaForm';
   import { gravidanzeScheda, prossimoIncontro, righeIncontri, testo, type RigaIncontro } from '../lib/schedaView';
   import type { Gravidanza } from '../lib/types';
+  import { unsaved } from '../lib/unsaved.svelte';
 
   let { id }: { id: string } = $props();
 
@@ -56,32 +59,59 @@
   let foglio = $state<'parto' | 'gravidanza' | 'elimina' | null>(null);
   let precedentiAperte = $state(false);
   let dataParto = $state('');
-  let nuova = $state({ upm: '', dppEco: '', anamnesiOstetrica: '' });
+  let partoIniziale = '';
+  const nuovaVuota = { upm: '', dppEco: '', anamnesiOstetrica: '' };
+  let nuova = $state({ ...nuovaVuota });
   let lavoro = $state(false);
+  let erroreAzione = $state('');
+  let erroreParto = $state<string | undefined>(undefined);
+  let erroriNuova = $state<ErroriGravidanza>({});
 
   function apri(f: NonNullable<typeof foglio>) {
     menu = false;
-    if (f === 'parto') dataParto = g?.dataParto ?? today;
-    if (f === 'gravidanza') nuova = { upm: '', dppEco: '', anamnesiOstetrica: '' };
+    erroreAzione = '';
+    erroreParto = undefined;
+    erroriNuova = {};
+    if (f === 'parto') dataParto = partoIniziale = g?.dataParto ?? today;
+    if (f === 'gravidanza') nuova = { ...nuovaVuota };
     foglio = f;
   }
   const chiudi = () => (foglio = null);
 
+  // Something typed in an open sheet counts as unsaved (Back, tab bar, update banner ask first).
+  $effect(() => {
+    unsaved.dirty =
+      (foglio === 'parto' && dataParto !== partoIniziale) ||
+      (foglio === 'gravidanza' && isDirty(nuova, nuovaVuota));
+  });
+  $effect(() => () => {
+    unsaved.dirty = false;
+  });
+
   async function esegui(azione: () => Promise<unknown>) {
     if (lavoro) return;
     lavoro = true;
+    erroreAzione = '';
     try {
       await azione();
       foglio = null;
       menu = false;
+    } catch {
+      erroreAzione = 'Salvataggio non riuscito. Riprova.';
     } finally {
       lavoro = false;
     }
   }
 
-  const registraParto = () => esegui(() => updateGravidanza(g!.id, { dataParto }));
+  function registraParto() {
+    erroreParto = erroreData(dataParto, true);
+    if (erroreParto) return;
+    esegui(() => updateGravidanza(g!.id, { dataParto }));
+  }
   const annullaParto = () => esegui(() => updateGravidanza(g!.id, { dataParto: undefined, stato: 'in_corso' }));
-  const creaGravidanza = () =>
+  function creaGravidanza() {
+    erroriNuova = erroriGravidanza(nuova);
+    if (Object.keys(erroriNuova).length) return;
     esegui(() =>
       nuovaGravidanza(id, {
         upm: testo(nuova.upm),
@@ -89,6 +119,7 @@
         anamnesiOstetrica: testo(nuova.anamnesiOstetrica),
       }),
     );
+  }
   const archivia = (archiviata: boolean) => esegui(() => updateMamma(id, { archiviata }));
   const elimina = () =>
     esegui(async () => {
@@ -263,6 +294,7 @@
       <button type="button" onclick={() => apri('gravidanza')}>Nuova gravidanza</button>
       <button type="button" onclick={() => archivia(!mamma.archiviata)}>{mamma.archiviata ? 'Riattiva' : 'Archivia'}</button>
       <button type="button" class="rosso" onclick={() => apri('elimina')}>Elimina</button>
+      {#if erroreAzione}<p class="errore" role="alert">{erroreAzione}</p>{/if}
       <button type="button" class="chiudi" onclick={() => (menu = false)}>Chiudi</button>
     </div>
   </Sheet>
@@ -270,10 +302,18 @@
   <Sheet open={foglio === 'parto'} titolo={g?.stato === 'in_corso' ? 'Registra parto' : 'Data del parto'} onclose={chiudi}>
     <label class="campo">
       <span>Data del parto</span>
-      <input type="date" bind:value={dataParto} max={today} />
+      <input
+        type="date"
+        bind:value={dataParto}
+        max={today}
+        aria-invalid={erroreParto ? 'true' : undefined}
+        aria-describedby={erroreParto ? 'err-parto' : undefined}
+      />
+      {#if erroreParto}<small id="err-parto" class="err">{erroreParto}</small>{/if}
     </label>
     <div class="azioni">
-      <button type="button" class="btn primario pieno" disabled={!dataParto || lavoro} onclick={registraParto}>
+      {#if erroreAzione}<p class="errore" role="alert">{erroreAzione}</p>{/if}
+      <button type="button" class="btn primario pieno" disabled={lavoro} onclick={registraParto}>
         {g?.stato === 'in_corso' ? 'Registra parto' : 'Salva'}
       </button>
       {#if g?.dataParto}
@@ -287,8 +327,15 @@
     {#if g && !g.dataParto}
       <p class="nota">La gravidanza attuale sarà chiusa senza data del parto e passerà tra le precedenti.</p>
     {/if}
-    <CampiGravidanza bind:upm={nuova.upm} bind:dppEco={nuova.dppEco} bind:anamnesiOstetrica={nuova.anamnesiOstetrica} {today} />
+    <CampiGravidanza
+      bind:upm={nuova.upm}
+      bind:dppEco={nuova.dppEco}
+      bind:anamnesiOstetrica={nuova.anamnesiOstetrica}
+      {today}
+      errori={erroriNuova}
+    />
     <div class="azioni">
+      {#if erroreAzione}<p class="errore" role="alert">{erroreAzione}</p>{/if}
       <button type="button" class="btn primario pieno" disabled={lavoro} onclick={creaGravidanza}>Crea gravidanza</button>
       <button type="button" class="btn piano pieno" onclick={chiudi}>Annulla</button>
     </div>
@@ -301,6 +348,7 @@
     conferma="Elimina tutto"
     pericoloso
     alternativa={mamma.archiviata ? undefined : 'Archivia'}
+    errore={erroreAzione}
     onconferma={elimina}
     onalternativa={() => archivia(true)}
     onannulla={chiudi}
@@ -620,6 +668,13 @@
     border-bottom: 0;
     color: var(--grigio);
     font-weight: 600;
+  }
+  .errore {
+    margin: 0;
+    padding: 8px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--rosso);
   }
   .azioni {
     display: flex;

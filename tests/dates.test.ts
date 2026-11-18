@@ -26,6 +26,16 @@ describe('dates', () => {
     expect(isValidISODate('2026-02-30')).toBe(false);
     expect(isValidISODate('2026-2-3')).toBe(false);
     expect(isValidISODate('')).toBe(false);
+    expect(isValidISODate('20266-01-01')).toBe(false);
+  });
+  it('treats years 0000-0099 literally, not as 19xx', () => {
+    expect(addDays('0020-01-01', 1)).toBe('0020-01-02');
+    expect(diffDays('0099-12-31', '0100-01-01')).toBe(1);
+  });
+  it('rejects years before 1900 (a half-typed year in a date input)', () => {
+    expect(isValidISODate('0020-02-29')).toBe(false);
+    expect(isValidISODate('0202-03-20')).toBe(false);
+    expect(isValidISODate('1900-01-01')).toBe(true);
   });
 });
 

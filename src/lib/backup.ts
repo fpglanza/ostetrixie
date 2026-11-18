@@ -214,21 +214,25 @@ export function descriviUltimoBackup(ultimoBackup: string | undefined, today: IS
 // --- Export -----------------------------------------------------------------
 
 /**
- * Hands the file to the share sheet (iOS: "Salva su File", AirDrop…) or downloads it.
+ * Hands the file to the share sheet (iOS: "Salva su File", AirDrop…) or, where file
+ * sharing is unsupported, downloads it.
  * Call it straight from the tap handler with an already-built backup: on iOS the share
  * must start inside the user gesture, so nothing is awaited before `navigator.share`.
- * Resolves true when the file was handed over, false when the user cancelled the share.
+ * 'fatto': handed over; 'annullato': the user dismissed the share sheet; 'errore': the share
+ * was refused for another reason (no download fallback: it would run outside the gesture
+ * and might save nothing, so the backup must not be marked done).
  */
-export async function condividiOScarica(b: Backup, filename: string): Promise<boolean> {
+export type EsitoEsportazione = 'fatto' | 'annullato' | 'errore';
+
+export async function condividiOScarica(b: Backup, filename: string): Promise<EsitoEsportazione> {
   const json = JSON.stringify(b, null, 2);
   const file = new File([json], filename, { type: 'application/json' });
   if (typeof navigator.share === 'function' && navigator.canShare?.({ files: [file] })) {
     try {
       await navigator.share({ files: [file], title: filename });
-      return true;
+      return 'fatto';
     } catch (e) {
-      if (e instanceof DOMException && e.name === 'AbortError') return false;
-      // Share refused (e.g. gesture lost): fall back to a plain download.
+      return e instanceof DOMException && e.name === 'AbortError' ? 'annullato' : 'errore';
     }
   }
   const url = URL.createObjectURL(file);
@@ -240,5 +244,5 @@ export async function condividiOScarica(b: Backup, filename: string): Promise<bo
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
-  return true;
+  return 'fatto';
 }

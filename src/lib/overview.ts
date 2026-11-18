@@ -72,7 +72,7 @@ export function buildRighe(data: OverviewData, today: ISODate): RigaMamma[] {
       dataParto: g.dataParto ?? null,
       prossimo: programmati.filter((i) => i.data >= today).sort(byDataOra)[0] ?? null,
       daRegistrare: programmati.filter((i) => i.data < today).sort(byDataOra),
-      upmMancante: !g.upm,
+      upmMancante: dppEffettiva(g) === null,
     };
   });
 }

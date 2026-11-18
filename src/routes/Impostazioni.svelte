@@ -35,6 +35,7 @@
         timeoutMinuti = imp.timeoutMinuti;
         haDati = mamme > 0;
       },
+      error: () => avvisa('', 'Impossibile leggere i dati su questo dispositivo.'),
     });
     return () => sub.unsubscribe();
   });
@@ -82,12 +83,13 @@
     const condivisione = condividiOScarica(pronto, backupFilename(todayISO()));
     chiudiEsporta();
     condivisione
-      .then(async (fatto) => {
-        if (!fatto) return;
+      .then(async (esito) => {
+        if (esito === 'annullato') return;
+        if (esito === 'errore') throw new Error('condivisione rifiutata');
         await segnaBackupFatto(new Date());
         avvisa('Backup esportato.');
       })
-      .catch(() => avvisa('', 'Esportazione non riuscita.'));
+      .catch(() => avvisa('', 'Esportazione non riuscita, riprova.'));
   }
 
   // --- Import
@@ -198,9 +200,16 @@
     }
   }
 
+  let erroreTimeout = $state('');
   async function cambiaTimeout(e: Event) {
-    const v = Number((e.currentTarget as HTMLSelectElement).value);
-    await aggiornaImpostazioni({ timeoutMinuti: v });
+    const sel = e.currentTarget as HTMLSelectElement;
+    erroreTimeout = '';
+    try {
+      await aggiornaImpostazioni({ timeoutMinuti: Number(sel.value) });
+    } catch {
+      sel.value = String(timeoutMinuti);
+      erroreTimeout = 'Salvataggio non riuscito. Riprova.';
+    }
   }
 
   // --- Cancella tutti i dati
@@ -285,6 +294,7 @@
             </svg>
           </div>
         </label>
+        <p class="errore" role="alert">{erroreTimeout}</p>
         <div class="azioni">
           <button type="button" class="btn pieno" onclick={() => apriPin('cambia')}>Cambia PIN</button>
           <button type="button" class="btn pieno" onclick={() => apriPin('disattiva')}>Disattiva PIN</button>

@@ -25,6 +25,7 @@
   $effect(() => {
     const sub = liveQuery(() => getImpostazioni()).subscribe({
       next: (imp) => (ultimoBackup = imp.ultimoBackup),
+      error: () => (errore = true),
     });
     return () => sub.unsubscribe();
   });

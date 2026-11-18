@@ -20,6 +20,14 @@ describe('buildRighe', () => {
     expect(r).toMatchObject({ nome: 'Carmela Rossi', sezione: 'in_gravidanza', eg: '34+4', dpp: '2026-12-25', upmMancante: false, fuoriRange: false });
   });
 
+  it('an eco-only pregnancy has EG and is not "UPM mancante"', () => {
+    const [r] = buildRighe({
+      mamme: [mamma('m1', 'Eco')], gravidanze: [grav('g1', 'm1', { dppEco: '2027-01-10' })], incontri: [],
+    }, T);
+    expect(r.eg).not.toBeNull();
+    expect(r).toMatchObject({ dpp: '2027-01-10', upmMancante: false });
+  });
+
   it('flags missing UPM and sorts it after others', () => {
     const righe = buildRighe({
       mamme: [mamma('m2', 'Senza'), mamma('m1', 'Pina')],

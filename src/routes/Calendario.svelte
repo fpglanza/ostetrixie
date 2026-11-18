@@ -143,7 +143,8 @@
         {#each SETTIMANA as g (g)}<span class="gs" aria-hidden="true">{g}</span>{/each}
         {#each settimane.flat() as d (d)}
           {@const evs = eventi[d] ?? []}
-          {@const incontri = evs.filter((e) => e.incontro)}
+          {@const scaduto = (e: Evento) => (righe.get(e.incontro!.id)?.daRegistrare ? 0 : 1)}
+          {@const incontri = evs.filter((e) => e.incontro).sort((a, b) => scaduto(a) - scaduto(b))}
           <button
             type="button"
             class="giorno"

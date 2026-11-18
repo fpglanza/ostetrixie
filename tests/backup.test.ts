@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   backupFilename,
   buildBackup,
+  condividiOScarica,
   descriviUltimoBackup,
   restoreBackup,
   segnaBackupFatto,
@@ -251,5 +252,42 @@ describe('backup', () => {
     expect(descriviUltimoBackup(at('2026-11-17'), '2026-11-17')).toBe('oggi');
     expect(descriviUltimoBackup(at('2026-11-16'), '2026-11-17')).toBe('ieri');
     expect(descriviUltimoBackup(at('2026-11-05'), '2026-11-17')).toBe('12 giorni fa');
+  });
+});
+
+describe('condividiOScarica', () => {
+  const nome = 'ostetrixie-backup-2026-11-17.json';
+  let click: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    click = vi.fn();
+    const a = { click, remove: vi.fn(), style: {} as Record<string, string> };
+    vi.stubGlobal('document', { createElement: () => a, body: { append: vi.fn() } });
+    vi.stubGlobal('URL', Object.assign(Object.create(URL), { createObjectURL: () => 'blob:x', revokeObjectURL: vi.fn() }));
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  const conShare = (share: () => Promise<void>) =>
+    vi.stubGlobal('navigator', { share: vi.fn(share), canShare: () => true });
+
+  it('shared file: fatto, no download', async () => {
+    conShare(async () => {});
+    expect(await condividiOScarica(valido(), nome)).toBe('fatto');
+    expect(click).not.toHaveBeenCalled();
+  });
+  it('share sheet dismissed: annullato, no download', async () => {
+    conShare(async () => { throw new DOMException('x', 'AbortError'); });
+    expect(await condividiOScarica(valido(), nome)).toBe('annullato');
+    expect(click).not.toHaveBeenCalled();
+  });
+  it('share refused for another reason: errore, no download outside the gesture', async () => {
+    conShare(async () => { throw new DOMException('x', 'NotAllowedError'); });
+    expect(await condividiOScarica(valido(), nome)).toBe('errore');
+    expect(click).not.toHaveBeenCalled();
+  });
+  it('file sharing unsupported: downloads, fatto', async () => {
+    vi.stubGlobal('navigator', {});
+    expect(await condividiOScarica(valido(), nome)).toBe('fatto');
+    expect(click).toHaveBeenCalledOnce();
   });
 });

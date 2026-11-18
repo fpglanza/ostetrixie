@@ -1,6 +1,8 @@
 <script lang="ts">
   import CampiGravidanza from '../components/CampiGravidanza.svelte';
   import { todayISO } from '../lib/dates';
+  import { isDirty } from '../lib/incontroForm';
+  import { erroriMamma, formMamma, type ErroriMamma, type FormMamma } from '../lib/mammaForm';
   import { navigate } from '../lib/router.svelte';
   import {
     createMamma,
@@ -11,70 +13,74 @@
   } from '../lib/repo';
   import { gravidanzeScheda, testo } from '../lib/schedaView';
   import type { Gravidanza } from '../lib/types';
+  import { unsaved } from '../lib/unsaved.svelte';
 
   let { id }: { id?: string } = $props();
 
   const today = todayISO();
-  let nome = $state('');
-  let cognome = $state('');
-  let telefono = $state('');
-  let dataNascita = $state('');
-  let anamnesi = $state('');
-  let note = $state('');
-  let upm = $state('');
-  let dppEco = $state('');
-  let anamnesiOstetrica = $state('');
+  let form = $state<FormMamma>(formMamma());
+  /** The form as loaded; null until then (and after saving), so nothing counts as dirty. */
+  let base = $state<FormMamma | null>(null);
 
   let corrente: Gravidanza | null = null;
   let caricata = $state(false);
   let nonTrovata = $state(false);
+  let erroreCaricamento = $state(false);
   let salvando = $state(false);
+  let errori = $state<ErroriMamma>({});
   let errore = $state('');
 
   $effect(() => {
     if (!id) {
+      base = formMamma();
       caricata = true;
       return;
     }
-    getMammaDetail(id).then((d) => {
-      if (!d) {
-        nonTrovata = true;
-        return;
-      }
-      const m = d.mamma;
-      nome = m.nome;
-      cognome = m.cognome ?? '';
-      telefono = m.telefono ?? '';
-      dataNascita = m.dataNascita ?? '';
-      anamnesi = m.anamnesi ?? '';
-      note = m.note ?? '';
-      corrente = gravidanzeScheda(d.gravidanze).corrente;
-      upm = corrente?.upm ?? '';
-      dppEco = corrente?.dppEco ?? '';
-      anamnesiOstetrica = corrente?.anamnesiOstetrica ?? '';
-      caricata = true;
-    });
+    getMammaDetail(id).then(
+      (d) => {
+        if (!d) {
+          nonTrovata = true;
+          return;
+        }
+        corrente = gravidanzeScheda(d.gravidanze).corrente;
+        form = formMamma(d.mamma, corrente);
+        base = { ...form };
+        caricata = true;
+      },
+      () => (erroreCaricamento = true),
+    );
+  });
+
+  $effect(() => {
+    unsaved.dirty = base !== null && isDirty(form, base);
+  });
+  $effect(() => () => {
+    unsaved.dirty = false;
   });
 
   const indietro = $derived(id ? `#/mamma/${encodeURIComponent(id)}` : '#/');
 
   async function salva(e: SubmitEvent) {
     e.preventDefault();
-    if (!nome.trim()) {
-      errore = 'Il nome è obbligatorio.';
+    if (salvando) return;
+    const err = erroriMamma(form);
+    if (Object.keys(err).length) {
+      errori = err;
+      errore = err.nome && Object.keys(err).length === 1 ? err.nome : 'Controlla i campi in rosso.';
       return;
     }
+    errori = {};
     salvando = true;
     errore = '';
     const m = {
-      nome: nome.trim(),
-      cognome: testo(cognome),
-      telefono: testo(telefono),
-      dataNascita: testo(dataNascita),
-      anamnesi: testo(anamnesi),
-      note: testo(note),
+      nome: form.nome.trim(),
+      cognome: testo(form.cognome),
+      telefono: testo(form.telefono),
+      dataNascita: testo(form.dataNascita),
+      anamnesi: testo(form.anamnesi),
+      note: testo(form.note),
     };
-    const g = { upm: testo(upm), dppEco: testo(dppEco), anamnesiOstetrica: testo(anamnesiOstetrica) };
+    const g = { upm: testo(form.upm), dppEco: testo(form.dppEco), anamnesiOstetrica: testo(form.anamnesiOstetrica) };
     try {
       let mid = id;
       if (mid) {
@@ -84,6 +90,8 @@
       } else {
         mid = (await createMamma({ ...m, archiviata: false }, g)).mamma.id;
       }
+      base = null;
+      unsaved.dirty = false;
       navigate(`#/mamma/${encodeURIComponent(mid)}`, { replace: true });
     } catch {
       errore = 'Salvataggio non riuscito. Riprova.';
@@ -103,6 +111,8 @@
 
 {#if nonTrovata}
   <p class="msg">Mamma non trovata. <a href="#/">Torna alle mamme</a></p>
+{:else if erroreCaricamento}
+  <p class="msg" role="alert">Impossibile leggere i dati su questo dispositivo.</p>
 {:else if caricata}
   <form onsubmit={salva} novalidate>
     <h2 class="sez">Mamma</h2>
@@ -110,43 +120,56 @@
       <label class="campo">
         <span>Nome <small>obbligatorio</small></span>
         <input
-          bind:value={nome}
+          bind:value={form.nome}
           required
           autocomplete="off"
           autocapitalize="words"
-          aria-invalid={errore && !nome.trim() ? 'true' : undefined}
+          aria-invalid={errori.nome ? 'true' : undefined}
         />
       </label>
       <label class="campo">
         <span>Cognome</span>
-        <input bind:value={cognome} autocomplete="off" autocapitalize="words" />
+        <input bind:value={form.cognome} autocomplete="off" autocapitalize="words" />
       </label>
       <div class="coppia">
         <label class="campo">
           <span>Telefono</span>
-          <input type="tel" bind:value={telefono} autocomplete="off" inputmode="tel" />
+          <input type="tel" bind:value={form.telefono} autocomplete="off" inputmode="tel" />
         </label>
         <label class="campo">
           <span>Data di nascita</span>
-          <input type="date" bind:value={dataNascita} max={today} />
+          <input
+            type="date"
+            bind:value={form.dataNascita}
+            max={today}
+            aria-invalid={errori.dataNascita ? 'true' : undefined}
+            aria-describedby={errori.dataNascita ? 'err-nascita' : undefined}
+          />
+          {#if errori.dataNascita}<small id="err-nascita" class="err">{errori.dataNascita}</small>{/if}
         </label>
       </div>
     </div>
 
     <h2 class="sez">Gravidanza</h2>
     <div class="gruppo">
-      <CampiGravidanza bind:upm bind:dppEco bind:anamnesiOstetrica {today} />
+      <CampiGravidanza
+        bind:upm={form.upm}
+        bind:dppEco={form.dppEco}
+        bind:anamnesiOstetrica={form.anamnesiOstetrica}
+        {today}
+        {errori}
+      />
     </div>
 
     <h2 class="sez">Anamnesi e note</h2>
     <div class="gruppo">
       <label class="campo">
         <span>Anamnesi <small>generale</small></span>
-        <textarea bind:value={anamnesi} rows="4"></textarea>
+        <textarea bind:value={form.anamnesi} rows="4"></textarea>
       </label>
       <label class="campo">
         <span>Note</span>
-        <textarea bind:value={note} rows="3"></textarea>
+        <textarea bind:value={form.note} rows="3"></textarea>
       </label>
     </div>
 

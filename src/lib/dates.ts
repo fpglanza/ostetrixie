@@ -3,10 +3,17 @@ export type ISODate = string;
 const DAY_MS = 86_400_000;
 const RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
+/** UTC ms of a calendar date; unlike Date.UTC, years 0–99 are not mapped to 1900–1999. */
+function utc(y: number, m: number, d: number): number {
+  const dt = new Date(0);
+  dt.setUTCFullYear(y, m - 1, d);
+  return dt.getTime();
+}
+
 function parse(d: ISODate): number {
   const m = RE.exec(d);
   if (!m) throw new Error(`Data non valida: ${d}`);
-  return Date.UTC(+m[1], +m[2] - 1, +m[3]);
+  return utc(+m[1], +m[2], +m[3]);
 }
 
 function fmt(ms: number): ISODate {
@@ -41,10 +48,14 @@ export function formatShort(d: ISODate): string {
   return `${d.slice(8, 10)}.${d.slice(5, 7)}`;
 }
 
+/**
+ * A real calendar date in YYYY-MM-DD from 1900 on. Earlier years are what a date input
+ * emits while the year is still being typed ("0002-03-20"), never a value to keep.
+ */
 export function isValidISODate(s: string): boolean {
   const m = RE.exec(s);
-  if (!m) return false;
-  return fmt(Date.UTC(+m[1], +m[2] - 1, +m[3])) === s;
+  if (!m || +m[1] < 1900) return false;
+  return fmt(utc(+m[1], +m[2], +m[3])) === s;
 }
 
 const GIORNI = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];

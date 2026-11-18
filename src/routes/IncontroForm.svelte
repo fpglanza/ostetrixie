@@ -46,6 +46,7 @@
   let form = $state<FormIncontro>(formNuovo({}, today));
   let base = $state<FormIncontro | null>(null);
   let nonTrovato = $state(false);
+  let erroreCaricamento = $state(false);
   let misureAperte = $state(false);
   let toccatoStato = false;
   let toccatoTipo = false;
@@ -64,31 +65,33 @@
   const haMisure = (f: FormIncontro) => !!(f.sf || f.peso || f.pressione || f.bcf);
 
   $effect(() => {
-    (async () => {
-      const inc = id ? await getIncontroContext(id) : null;
-      const ctx = inc ?? (gid ? await getGravidanzaContext(gid) : null);
-      if (!ctx) {
-        nonTrovato = true;
-        return;
-      }
-      mamma = ctx.mamma;
-      grav = ctx.gravidanza;
-      const f = inc ? formDaIncontro(inc.incontro) : formNuovo(ctx.gravidanza, today);
-      if (inc) {
-        salvatoId = inc.incontro.id;
-        statoCaricato = inc.incontro.stato;
-      }
-      form = f;
-      base = { ...f };
-      misureAperte = f.tipo === 'controllo' || haMisure(f);
-      destinatari = destinatariCopia(await getAllData(), ctx.mamma.id, today);
-      if (inc && copiaDopoSalvataggio === inc.incontro.id) {
-        copiaDopoSalvataggio = null;
-        scelti = [];
-        foglio = 'copia';
-      }
-    })();
+    carica().catch(() => (erroreCaricamento = true));
   });
+
+  async function carica() {
+    const inc = id ? await getIncontroContext(id) : null;
+    const ctx = inc ?? (gid ? await getGravidanzaContext(gid) : null);
+    if (!ctx) {
+      nonTrovato = true;
+      return;
+    }
+    mamma = ctx.mamma;
+    grav = ctx.gravidanza;
+    const f = inc ? formDaIncontro(inc.incontro) : formNuovo(ctx.gravidanza, today);
+    if (inc) {
+      salvatoId = inc.incontro.id;
+      statoCaricato = inc.incontro.stato;
+    }
+    form = f;
+    base = { ...f };
+    misureAperte = f.tipo === 'controllo' || haMisure(f);
+    destinatari = destinatariCopia(await getAllData(), ctx.mamma.id, today);
+    if (inc && copiaDopoSalvataggio === inc.incontro.id) {
+      copiaDopoSalvataggio = null;
+      scelti = [];
+      foglio = 'copia';
+    }
+  }
 
   $effect(() => {
     unsaved.dirty = base !== null && isDirty(form, base);
@@ -191,8 +194,17 @@
   }
 
   async function elimina() {
-    if (!salvatoId) return;
-    await deleteIncontro(salvatoId);
+    if (!salvatoId || salvando) return;
+    salvando = true;
+    try {
+      await deleteIncontro(salvatoId);
+    } catch {
+      foglio = null;
+      errore = 'Salvataggio non riuscito. Riprova.';
+      return;
+    } finally {
+      salvando = false;
+    }
     foglio = null;
     unsaved.dirty = false;
     base = null;
@@ -214,6 +226,8 @@
 
 {#if nonTrovato}
   <p class="msg">Incontro non trovato. <a href="#/">Torna alle mamme</a></p>
+{:else if erroreCaricamento}
+  <p class="msg" role="alert">Impossibile leggere i dati su questo dispositivo.</p>
 {:else if grav}
   <form onsubmit={salva} novalidate>
     {#if statoCaricato === 'programmato' && form.stato === 'programmato'}
@@ -503,16 +517,6 @@
   }
   .misure[open] summary svg {
     transform: rotate(180deg);
-  }
-  .err {
-    display: block;
-    margin-top: 4px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--rosso);
-  }
-  .campo input[aria-invalid='true'] {
-    border-color: var(--rosso);
   }
   .altre {
     display: flex;

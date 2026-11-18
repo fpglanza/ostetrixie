@@ -1,5 +1,6 @@
 <script lang="ts">
   import { formatIT, type ISODate } from '../lib/dates';
+  import type { ErroriGravidanza } from '../lib/mammaForm';
   import { anteprimaGravidanza } from '../lib/schedaView';
 
   let {
@@ -7,7 +8,16 @@
     dppEco = $bindable(''),
     anamnesiOstetrica = $bindable(''),
     today,
-  }: { upm: string; dppEco: string; anamnesiOstetrica: string; today: ISODate } = $props();
+    errori = {},
+  }: {
+    upm: string;
+    dppEco: string;
+    anamnesiOstetrica: string;
+    today: ISODate;
+    /** Field errors shown under the dates after a rejected save. */
+    errori?: ErroriGravidanza;
+  } = $props();
+  const uid = $props.id();
 
   const ante = $derived(anteprimaGravidanza({ upm, dppEco }, today));
 </script>
@@ -15,11 +25,23 @@
 <div class="coppia">
   <label class="campo">
     <span>UPM <small>ultima mestruazione</small></span>
-    <input type="date" bind:value={upm} />
+    <input
+      type="date"
+      bind:value={upm}
+      aria-invalid={errori.upm ? 'true' : undefined}
+      aria-describedby={errori.upm ? `${uid}-upm` : undefined}
+    />
+    {#if errori.upm}<small id="{uid}-upm" class="err">{errori.upm}</small>{/if}
   </label>
   <label class="campo">
     <span>DPP da eco <small>se corretta</small></span>
-    <input type="date" bind:value={dppEco} />
+    <input
+      type="date"
+      bind:value={dppEco}
+      aria-invalid={errori.dppEco ? 'true' : undefined}
+      aria-describedby={errori.dppEco ? `${uid}-eco` : undefined}
+    />
+    {#if errori.dppEco}<small id="{uid}-eco" class="err">{errori.dppEco}</small>{/if}
   </label>
 </div>
 

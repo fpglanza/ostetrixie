@@ -69,7 +69,7 @@ export function righeIncontri(incontri: Incontro[], g: Gravidanza, today: ISODat
         epoca: pp ? pp.replace(/^parto /, '') : eg ? formatEG(eg) : null,
         fuoriRange: eg?.fuoriRange ?? false,
         tipo: TIPO[i.tipo],
-        sf: i.sinfisiFondoCm != null ? `SF ${i.sinfisiFondoCm} cm` : null,
+        sf: i.sinfisiFondoCm != null ? `SF ${numeroIT(i.sinfisiFondoCm)} cm` : null,
         partner: i.partnerPresente === 'si',
         programmato: i.stato === 'programmato',
         daRegistrare: i.stato === 'programmato' && i.data < today,
@@ -84,6 +84,11 @@ export function prossimoIncontro(incontri: Incontro[], today: ISODate): Incontro
     incontri.filter((i) => i.stato === 'programmato' && i.data >= today).sort(cronologico)[0] ??
     null
   );
+}
+
+/** 33.5 → "33,5" (Italian decimal comma); undefined → "". */
+export function numeroIT(n: number | undefined): string {
+  return n == null ? '' : String(n).replace('.', ',');
 }
 
 /** Trimmed form text, or undefined when blank. */

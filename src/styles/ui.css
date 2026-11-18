@@ -70,6 +70,16 @@
   appearance: none;
   -webkit-appearance: none;
 }
+.campo input[aria-invalid='true'] {
+  border-color: var(--rosso);
+}
+.campo .err {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rosso);
+}
 .campo textarea {
   min-height: 96px;
   resize: vertical;
