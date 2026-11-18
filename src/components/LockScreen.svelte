@@ -2,6 +2,7 @@
   import CancellaDati from './CancellaDati.svelte';
   import { lock } from '../lib/lock.svelte';
   import { navigate } from '../lib/router.svelte';
+  import { rispondiUscita, unsaved, uscita } from '../lib/unsaved.svelte';
 
   const MAX = 6;
   const MIN = 4;
@@ -66,7 +67,10 @@
   }
 
   function cancellato() {
-    lock.unlock();
+    // The data are gone: drop whatever the hidden screen was holding, then go to the empty list.
+    if (uscita.chiede) rispondiUscita(false);
+    unsaved.dirty = false;
+    lock.unlock({ scartaDialoghi: true });
     navigate('#/', { replace: true });
   }
 </script>
