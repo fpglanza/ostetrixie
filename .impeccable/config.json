@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/orario.html"
+        ],
+        "createdAt": "2026-11-18T07:22:58.262Z",
+        "reason": "Claude: decision-round sketch, exempt mock predating DESIGN.md; not shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/libretto.html"
+        ],
+        "createdAt": "2026-11-18T07:22:58.294Z",
+        "reason": "Claude: decision-round sketch, exempt mock predating DESIGN.md; not shipped"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-11-18T07:22:58.326Z",
+        "reason": "Claude: decision-round sketch, exempt mock predating DESIGN.md; not shipped"
+      }
+    ]
+  }
+}

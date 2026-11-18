@@ -5,3 +5,7 @@
 node_modules/
 dist/
 .DS_Store
+*.local
+*.tsbuildinfo
+.impeccable/hook.cache.json
+.claude/
