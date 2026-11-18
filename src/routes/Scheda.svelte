@@ -305,6 +305,7 @@
       <input
         type="date"
         bind:value={dataParto}
+        class:da-compilare={!dataParto}
         max={today}
         aria-invalid={erroreParto ? 'true' : undefined}
         aria-describedby={erroreParto ? 'err-parto' : undefined}

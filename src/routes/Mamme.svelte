@@ -167,7 +167,7 @@
 </main>
 
 {#if righe && !vuoto && !errore}
-  {@render nuovaMamma('pill fab')}
+  <div class="dock">{@render nuovaMamma('pill')}</div>
 {/if}
 
 <style>
@@ -427,11 +427,22 @@
     font-weight: 700;
     text-decoration: none;
   }
-  .fab {
+  /* The pill's own strip above the tab bar: the list scrolls under it, never behind the pill. */
+  .dock {
     position: fixed;
     z-index: 5;
-    right: calc(16px + env(safe-area-inset-right));
-    bottom: calc(var(--tabbar-h) + 16px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    left: 0;
+    right: 0;
+    bottom: var(--tabbar-h);
+    max-width: var(--col);
+    margin: 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px calc(16px + env(safe-area-inset-right)) 8px calc(16px + env(safe-area-inset-left));
+    background: var(--carta);
+    border-top: 1px solid var(--filo);
+  }
+  .dock .pill {
+    min-height: 48px;
   }
 </style>

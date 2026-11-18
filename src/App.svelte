@@ -113,6 +113,8 @@
     top: 0;
     left: 0;
     right: 0;
+    max-width: var(--col);
+    margin: 0 auto;
     z-index: 20;
     height: env(safe-area-inset-top);
     background: var(--giallo);

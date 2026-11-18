@@ -244,6 +244,7 @@
           <input
             type="date"
             bind:value={() => form.data, cambiaData}
+            class:da-compilare={!form.data}
             required
             aria-invalid={errori.data ? 'true' : undefined}
             aria-describedby="epoca"
@@ -251,7 +252,7 @@
         </label>
         <label class="campo">
           <span>Ora <small>facoltativa</small></span>
-          <input type="time" bind:value={form.ora} />
+          <input type="time" bind:value={form.ora} class:da-compilare={!form.ora} />
         </label>
       </div>
       <p id="epoca" class="epoca num {linea?.tono ?? ''}">
@@ -532,6 +533,8 @@
     z-index: 5;
     left: 0;
     right: 0;
+    max-width: var(--col);
+    margin: 0 auto;
     bottom: var(--tabbar-h);
     padding: 10px calc(18px + env(safe-area-inset-right)) 10px calc(18px + env(safe-area-inset-left));
     background: var(--carta);

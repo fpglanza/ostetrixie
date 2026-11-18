@@ -48,7 +48,9 @@
     background: var(--carta);
     border-radius: 50%;
   }
+  /* The arrival square is painted over the oggi disc, so near term it stays readable. */
   .st.end {
+    z-index: 1;
     background: var(--ink);
     border-radius: 2px;
   }

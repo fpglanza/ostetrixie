@@ -11,6 +11,17 @@ try {
   /* unsupported */
 }
 
+// Date and time fields draw their own icon (ui.css): a tap anywhere on one opens the native picker.
+document.addEventListener('click', (e) => {
+  const el = e.target;
+  if (!(el instanceof HTMLInputElement) || (el.type !== 'date' && el.type !== 'time')) return;
+  try {
+    el.showPicker();
+  } catch {
+    /* unsupported or already open: the native control still works */
+  }
+});
+
 const app = mount(App, { target: document.getElementById('app')! });
 
 export default app;

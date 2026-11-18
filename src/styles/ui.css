@@ -66,9 +66,42 @@
   background: var(--carta);
   font-size: 16px;
 }
-.campo input[type='date'] {
+/* Date and time fields: the OS indicator is hidden but still covers the whole field
+   (so a tap opens the native picker), and the app's own 2px ink icon is drawn instead. */
+.campo input[type='date'],
+.campo input[type='time'] {
+  position: relative;
   appearance: none;
   -webkit-appearance: none;
+  padding-right: 42px;
+  background: var(--carta) no-repeat right 12px center / 20px 20px;
+  text-align: left;
+  cursor: pointer;
+}
+.campo input[type='date'] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23141414' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4.5' width='14' height='12.5' rx='1.5'/%3E%3Cpath d='M3 8.5h14M7 2.5v4M13 2.5v4'/%3E%3C/svg%3E");
+}
+.campo input[type='time'] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23141414' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='10' cy='10' r='7'/%3E%3Cpath d='M10 6v4l2.5 2.5'/%3E%3C/svg%3E");
+}
+.campo input[type='date']::-webkit-calendar-picker-indicator,
+.campo input[type='time']::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.campo input::-webkit-date-and-time-value {
+  text-align: left;
+}
+/* Empty date/time (the component sets .da-compilare): the dd/mm/yyyy mask reads as a placeholder. */
+.campo input.da-compilare,
+.campo input.da-compilare::-webkit-datetime-edit {
+  color: var(--grigio);
 }
 .campo input[aria-invalid='true'] {
   border-color: var(--rosso);

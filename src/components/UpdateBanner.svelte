@@ -56,6 +56,8 @@
     position: fixed;
     left: 0;
     right: 0;
+    max-width: var(--col);
+    margin: 0 auto;
     bottom: var(--tabbar-base);
     z-index: 10;
     height: var(--banner-h);

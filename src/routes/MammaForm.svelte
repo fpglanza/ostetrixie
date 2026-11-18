@@ -141,6 +141,7 @@
           <input
             type="date"
             bind:value={form.dataNascita}
+            class:da-compilare={!form.dataNascita}
             max={today}
             aria-invalid={errori.dataNascita ? 'true' : undefined}
             aria-describedby={errori.dataNascita ? 'err-nascita' : undefined}
@@ -233,6 +234,8 @@
     z-index: 5;
     left: 0;
     right: 0;
+    max-width: var(--col);
+    margin: 0 auto;
     bottom: var(--tabbar-h);
     padding: 10px calc(18px + env(safe-area-inset-right)) 10px calc(18px + env(safe-area-inset-left));
     background: var(--carta);

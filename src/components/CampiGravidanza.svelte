@@ -28,6 +28,7 @@
     <input
       type="date"
       bind:value={upm}
+      class:da-compilare={!upm}
       aria-invalid={errori.upm ? 'true' : undefined}
       aria-describedby={errori.upm ? `${uid}-upm` : undefined}
     />
@@ -38,6 +39,7 @@
     <input
       type="date"
       bind:value={dppEco}
+      class:da-compilare={!dppEco}
       aria-invalid={errori.dppEco ? 'true' : undefined}
       aria-describedby={errori.dppEco ? `${uid}-eco` : undefined}
     />

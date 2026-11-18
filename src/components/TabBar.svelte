@@ -38,6 +38,8 @@
     left: 0;
     right: 0;
     bottom: 0;
+    max-width: var(--col);
+    margin: 0 auto;
     z-index: 10;
     height: var(--tabbar-base);
     padding: 6px max(env(safe-area-inset-right), 0px) env(safe-area-inset-bottom) max(env(safe-area-inset-left), 0px);

@@ -43,15 +43,20 @@
 
 <style>
   dialog {
-    margin: auto 0 0;
+    margin: auto auto 0;
     width: 100%;
-    max-width: 100%;
+    max-width: var(--col);
     max-height: 90dvh;
     padding: 0;
     border: 0;
     border-top: 2px solid var(--ink);
     background: var(--carta);
     color: var(--ink);
+  }
+  @media (min-width: 520px) {
+    dialog {
+      border-inline: 2px solid var(--ink);
+    }
   }
   dialog::backdrop {
     background: rgba(20, 20, 20, 0.5);
