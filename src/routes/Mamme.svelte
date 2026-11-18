@@ -178,10 +178,10 @@
 
 {#if righe && !vuoto && !errore}
   <div class="dock">
-    <!-- Each part stays whole: on a phone the line breaks between parts, never inside one. -->
-    <p class="conteggio num">
-      {#each conteggio as parte, i (parte)}<span>{parte}{i < conteggio.length - 1 ? ' ·' : ''}</span>{' '}{/each}
-    </p>
+    <!-- Parts stay whole; when they cannot share a line they stack without separators. -->
+    <div class="conteggio">
+      <p class="num">{#each conteggio as parte (parte)}<span>{parte}</span>{/each}</p>
+    </div>
     {@render nuovaMamma('pill')}
   </div>
 {/if}
@@ -467,7 +467,14 @@
     min-height: 44px;
   }
   .conteggio {
+    flex: 1;
     min-width: 0;
+    container-type: inline-size;
+  }
+  .conteggio p {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.3em;
     margin: 0;
     font-size: 16px;
     font-weight: 800;
@@ -475,5 +482,18 @@
   }
   .conteggio span {
     white-space: nowrap;
+  }
+  .conteggio span + span::before {
+    content: '·';
+    margin-right: 0.3em;
+  }
+  /* Narrower than both parts on one line: they stack, so no separator. */
+  @container (max-width: 230px) {
+    .conteggio span + span::before {
+      content: none;
+    }
+    .conteggio p {
+      flex-direction: column;
+    }
   }
 </style>
