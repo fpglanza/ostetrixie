@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-18T07:21:30+00:00",
+  "title": "Design System: Ostetrixie",
+  "extensions": {
+    "colorMeta": {
+      "giallo": {
+        "role": "primary",
+        "displayName": "Partenze Yellow",
+        "canonical": "oklch(85.5% 0.170 94)",
+        "tonalRamp": [
+          "#110A00",
+          "#2D2300",
+          "#4D3E01",
+          "#705C02",
+          "#957B04",
+          "#BB9C09",
+          "#DEC675",
+          "#FEEFB9"
+        ]
+      },
+      "rosso": {
+        "role": "signal",
+        "displayName": "Signal Red",
+        "canonical": "oklch(55.9% 0.206 29)",
+        "tonalRamp": [
+          "#1C0201",
+          "#460B07",
+          "#751912",
+          "#A7271F",
+          "#DC372C",
+          "#F76D5D",
+          "#FDB1A6",
+          "#FFE9E5"
+        ]
+      },
+      "oggi": {
+        "role": "signal",
+        "displayName": "Oggi Blue",
+        "canonical": "oklch(51.3% 0.202 262)",
+        "tonalRamp": [
+          "#020A20",
+          "#0B214E",
+          "#183B80",
+          "#2757B7",
+          "#3774F1",
+          "#689CFE",
+          "#ABC8FD",
+          "#E7EFFE"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(19.1% 0.000 90)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#404040",
+          "#5D5D5D",
+          "#7D7D7D",
+          "#9E9E9E",
+          "#C7C7C7",
+          "#EEEEEE"
+        ]
+      },
+      "carta": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#404040",
+          "#5D5D5D",
+          "#7D7D7D",
+          "#9E9E9E",
+          "#C7C7C7",
+          "#EEEEEE"
+        ]
+      },
+      "grigio": {
+        "role": "neutral",
+        "displayName": "Timetable Grey",
+        "canonical": "oklch(47.5% 0.000 90)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242424",
+          "#404040",
+          "#5D5D5D",
+          "#7D7D7D",
+          "#9E9E9E",
+          "#C7C7C7",
+          "#EEEEEE"
+        ]
+      },
+      "filo": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(90.6% 0.014 93)",
+        "tonalRamp": [
+          "#0C0B0A",
+          "#252421",
+          "#41403B",
+          "#605E57",
+          "#807D74",
+          "#A19E97",
+          "#C9C7C1",
+          "#F0EEEA"
+        ]
+      },
+      "vicina": {
+        "role": "neutral",
+        "displayName": "Nearest Tint",
+        "canonical": "oklch(97.6% 0.045 98)",
+        "tonalRamp": [
+          "#0C0B06",
+          "#262419",
+          "#44402F",
+          "#635E47",
+          "#847E60",
+          "#A49F85",
+          "#CCC8B4",
+          "#F2EFE1"
+        ]
+      },
+      "premuto": {
+        "role": "neutral",
+        "displayName": "Pressed",
+        "canonical": "oklch(96.6% 0.011 95)",
+        "tonalRamp": [
+          "#0B0B0A",
+          "#252421",
+          "#41403C",
+          "#5F5E58",
+          "#7F7D76",
+          "#A09E98",
+          "#C8C7C2",
+          "#EFEEEB"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Gestational age at the top of a mother's scheda."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Screen titles in the yellow header."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Bottom-sheet titles and the Calendario month name."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "EG figure leading each Mamme row."
+      },
+      "figure-small": {
+        "displayName": "Figure Small",
+        "purpose": "Arrival dates, meeting-row dates and EG."
+      },
+      "name": {
+        "displayName": "Name",
+        "purpose": "Mother's name in a row; sheet menu items."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Field values, buttons, paragraphs."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Grey line under a name, notes, field labels."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase column headers and section labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "oggi-halo",
+        "value": "0 0 0 3px var(--carta)",
+        "purpose": "Paper halo around the today dot on the station line. Not elevation."
+      },
+      {
+        "name": "oggi-ring",
+        "value": "inset 0 0 0 2px var(--oggi)",
+        "purpose": "Today's ring in the month grid."
+      },
+      {
+        "name": "segment-focus",
+        "value": "inset 0 0 0 3px var(--carta), inset 0 0 0 5px var(--ink)",
+        "purpose": "Focus ring on a segmented-choice option."
+      },
+      {
+        "name": "sheet-scrim",
+        "value": "rgba(20, 20, 20, 0.5)",
+        "purpose": "Backdrop behind bottom sheets (dialog::backdrop)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "chevron-turn",
+        "value": "transform 0.15s",
+        "purpose": "Disclosure chevron rotation on Archiviate and anamnesi toggles; the only motion in the app."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "col",
+        "value": "480px",
+        "purpose": "Max width of the phone column."
+      },
+      {
+        "name": "framed",
+        "value": "520px",
+        "purpose": "From here the column is centred with a 2px ink edge each side."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Pill",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one primary action per view, ink with yellow type.",
+      "html": "<button class=\"ds-btn ds-btn-primary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 18 18\" aria-hidden=\"true\"><path d=\"M9 2v14M2 9h14\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"/></svg>Nuova mamma</button>",
+      "css": ".ds-btn { display:inline-flex; align-items:center; gap:8px; min-height:50px; padding:0 20px; border:2px solid var(--ink); border-radius:30px; background:var(--carta); color:var(--ink); font-family: var(--font); font-size:16px; font-weight:700; cursor:pointer; } .ds-btn:active { background:var(--premuto); } .ds-btn:focus-visible { outline:2px solid var(--ink); outline-offset:2px; } .ds-btn-primary { background:var(--ink); color:var(--giallo); } .ds-btn-primary:active { background:var(--ink); opacity:.9; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Default action: paper, 2px ink border, pill ends.",
+      "html": "<button class=\"ds-btn-out\">Esporta backup</button>",
+      "css": ".ds-btn-out { display:inline-flex; align-items:center; min-height:50px; padding:0 20px; border:2px solid var(--ink); border-radius:30px; background:var(--carta); color:var(--ink); font-family: var(--font); font-size:16px; font-weight:700; cursor:pointer; } .ds-btn-out:hover, .ds-btn-out:active { background:var(--premuto); } .ds-btn-out:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Confirms a destructive action only.",
+      "html": "<button class=\"ds-btn-danger\">Elimina</button>",
+      "css": ".ds-btn-danger { min-height:50px; padding:0 20px; border:2px solid var(--rosso); border-radius:30px; background:var(--rosso); color:var(--carta); font-family: var(--font); font-size:16px; font-weight:700; cursor:pointer; } .ds-btn-danger:focus-visible { outline:2px solid var(--ink); outline-offset:2px; }"
+    },
+    {
+      "name": "Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Labelled text field: 2px ink border, 8px radius, red on error.",
+      "html": "<label class=\"ds-campo\"><span>Nome <small>obbligatorio</small></span><input value=\"Carmela\"></label>",
+      "css": ".ds-campo { display:block; font-family: var(--font); color:var(--ink); } .ds-campo span { display:block; margin-bottom:5px; font-size:13px; font-weight:700; } .ds-campo small { font-weight:600; color:var(--grigio); } .ds-campo input { display:block; width:100%; min-height:48px; padding:10px 12px; border:2px solid var(--ink); border-radius:8px; background:var(--carta); font:inherit; font-size:16px; } .ds-campo input:focus-visible { outline:2px solid var(--ink); outline-offset:2px; } .ds-campo input[aria-invalid=true] { border-color:var(--rosso); }"
+    },
+    {
+      "name": "Segmented Choice",
+      "kind": "chip",
+      "refersTo": "segment-selected",
+      "description": "Radio options in an ink frame; ink gaps divide, selected turns ink.",
+      "html": "<div class=\"ds-seg\"><label class=\"on\">Fatto</label><label>Programmato</label></div>",
+      "css": ".ds-seg { display:grid; grid-auto-flow:column; grid-auto-columns:1fr; gap:2px; border:2px solid var(--ink); border-radius:8px; background:var(--ink); overflow:hidden; font-family: var(--font); } .ds-seg label { display:flex; align-items:center; justify-content:center; min-height:46px; background:var(--carta); font-size:15px; font-weight:700; cursor:pointer; } .ds-seg label:active { background:var(--premuto); } .ds-seg label.on { background:var(--ink); color:var(--carta); }"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "tab-active-icon",
+      "description": "Three bottom tabs; active tab gets a yellow icon plate.",
+      "html": "<nav class=\"ds-tabs\"><a class=\"on\" href=\"#\"><svg viewBox=\"0 0 22 22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"11\" cy=\"7\" r=\"4\"/><path d=\"M3 20c1-4.5 4.5-6.5 8-6.5s7 2 8 6.5\"/></svg>Mamme</a><a href=\"#\"><svg viewBox=\"0 0 22 22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"4\" width=\"16\" height=\"15\" rx=\"2\"/><path d=\"M3 9h16M7 2v4M15 2v4\"/></svg>Calendario</a><a href=\"#\"><svg viewBox=\"0 0 22 22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"11\" cy=\"11\" r=\"3\"/><path d=\"M11 2v3M11 17v3M2 11h3M17 11h3\"/></svg>Impostazioni</a></nav>",
+      "css": ".ds-tabs { display:grid; grid-template-columns:repeat(3,1fr); padding:6px 0 10px; border-top:2px solid var(--ink); background:var(--carta); font-family: var(--font); } .ds-tabs a { display:flex; flex-direction:column; align-items:center; gap:2px; min-height:44px; font-size:12px; line-height:14px; font-weight:700; color:var(--grigio); text-decoration:none; } .ds-tabs a:hover { color:var(--ink); } .ds-tabs a:focus-visible { outline:2px solid var(--ink); outline-offset:-2px; } .ds-tabs svg { width:40px; height:28px; padding:3px 9px; border-radius:8px; } .ds-tabs a.on { color:var(--ink); } .ds-tabs a.on svg { background:var(--giallo); }"
+    },
+    {
+      "name": "Yellow Header",
+      "kind": "custom",
+      "refersTo": "header",
+      "description": "Partenze header: condensed title left, date right, column header strip.",
+      "html": "<header class=\"ds-head\"><div class=\"top\"><h1>Mamme</h1><div class=\"d\">mercoledì<b>18/11</b></div></div><div class=\"cols\"><span>Epoca</span><span>Mamma · prossimo</span><span>Arrivo</span></div></header>",
+      "css": ".ds-head { background:var(--giallo); padding:18px 18px 0; color:var(--ink); font-family: var(--font); } .ds-head .top { display:flex; justify-content:space-between; align-items:baseline; } .ds-head h1 { margin:0; font-size:40px; font-weight:800; line-height:1.1; letter-spacing:-.02em; font-variation-settings:'wdth' 75; } .ds-head .d { font-size:15px; font-weight:600; text-align:right; line-height:1.15; } .ds-head .d b { display:block; font-size:22px; font-weight:800; font-variant-numeric:tabular-nums; font-variation-settings:'wdth' 70; } .ds-head .cols { display:grid; grid-template-columns:76px 1fr 66px; gap:10px; margin-top:14px; padding:7px 0; border-top:2px solid var(--ink); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; } .ds-head .cols span:last-child { text-align:right; }"
+    },
+    {
+      "name": "Timetable Row with Station Line",
+      "kind": "custom",
+      "refersTo": "timetable-row",
+      "description": "Signature row: condensed EG figure, name and next meeting, DPP, station line with today dot.",
+      "html": "<a class=\"ds-row\" href=\"#\"><div class=\"eg\">34+2<small>settimane</small></div><div><div class=\"nome\">Carmela</div><div class=\"info\">Giovedì 20/11 · controllo</div></div><div class=\"arr\"><b>06/01</b><span>DPP</span></div><div class=\"linea\"><i class=\"st\" style=\"left:0%\"></i><i class=\"st\" style=\"left:32.5%\"></i><i class=\"st\" style=\"left:67.5%\"></i><i class=\"st\" style=\"left:92.5%\"></i><i class=\"st end\" style=\"left:100%\"></i><i class=\"pos\" style=\"left:85.7%\"></i></div></a>",
+      "css": ".ds-row { display:grid; grid-template-columns:76px 1fr 66px; gap:10px; padding:12px 18px 11px; border-bottom:1px solid var(--filo); color:var(--ink); text-decoration:none; font-family: var(--font); } .ds-row:hover, .ds-row:active { background:var(--premuto); } .ds-row:focus-visible { outline:2px solid var(--ink); outline-offset:-2px; } .ds-row .eg { font-size:34px; font-weight:800; line-height:1; letter-spacing:-.01em; font-variant-numeric:tabular-nums; font-variation-settings:'wdth' 70; } .ds-row .eg small { display:block; margin-top:3px; font-size:11px; font-weight:600; color:var(--grigio); letter-spacing:.04em; font-variation-settings:'wdth' 100; } .ds-row .nome { font-size:17px; font-weight:700; line-height:1.2; } .ds-row .info { margin-top:2px; font-size:13px; color:var(--grigio); } .ds-row .arr { text-align:right; font-variant-numeric:tabular-nums; font-variation-settings:'wdth' 70; } .ds-row .arr b { display:block; font-size:20px; font-weight:800; line-height:1; } .ds-row .arr span { font-size:11px; font-weight:600; color:var(--grigio); } .ds-row .linea { grid-column:2/4; position:relative; height:14px; } .ds-row .linea::before { content:''; position:absolute; left:0; right:0; top:6px; height:2px; background:var(--ink); } .ds-row .linea i { position:absolute; transform:translateX(-50%); } .ds-row .st { top:2px; width:10px; height:10px; border:2px solid var(--ink); background:var(--carta); border-radius:50%; } .ds-row .st.end { z-index:1; background:var(--ink); border-radius:2px; } .ds-row .pos { top:0; width:14px; height:14px; background:var(--oggi); border-radius:50%; box-shadow:0 0 0 3px var(--carta); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Orario delle partenze",
+    "overview": "The app is a station departures board for a caseload. Every pregnancy is a journey with a known arrival, so the main list reads as a timetable: a gestational-age figure in big condensed tabular numerals on the left, the mother and her next meeting in the middle, the arrival date on the right, and under each row a line with stations at 13, 27 and 37 weeks, a square terminus at 40, and one blue dot for today. Yellow header, black ink, white paper. The structure comes from rules, not containers.\n\nDensity is high but readable at arm's length in daylight. Rows sit on 1px hairlines, sections open with a 2px ink rule, and hierarchy comes from scale contrast between figures and text rather than from boxes, tints or shadows. Colour is used for signals only: yellow marks where you are (header, active tab), red marks what needs attention, blue marks now. The world rejects the pastel-baby card grid and the clinical-blue EHR.",
+    "keyCharacteristics": [
+      "Partenze yellow header on every top-level screen, ink type on it, closed by a 2px ink rule.",
+      "Timetable rows on hairlines; no cards anywhere.",
+      "Condensed (wdth 70) tabular numerals for every clinical figure: EG, dates, DPP, counts.",
+      "The station line, used in Mamme, Scheda and the Calendario panoramica.",
+      "Black pills with yellow type for the one primary action.",
+      "A single phone column (480px) that stays centred and edged in ink on wide screens."
+    ],
+    "rules": [
+      {
+        "name": "The Three Signals Rule",
+        "body": "Yellow means place, red means act, blue means now. No colour is added for decoration, and none of the three borrows another's job.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Blue Rule",
+        "body": "Oggi blue appears only where it marks today's position. It is never a link colour, a button, or an accent.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Every number that is a clinical fact (EG, DPP, dates, counts) gets tabular numerals at wdth 70, so columns line up like a timetable.",
+        "section": "typography"
+      },
+      {
+        "name": "The Scale Contrast Rule",
+        "body": "Hierarchy comes from size and width: a 34px condensed figure next to 17px names and 13px grey meta. Don't add boxes, colours or icons to create emphasis.",
+        "section": "typography"
+      },
+      {
+        "name": "The Rules Not Boxes Rule",
+        "body": "Group with a rule, not a card. If a section needs separating, give it a 2px ink rule at the top; if rows need separating, a 1px hairline.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do put every top-level screen under the yellow header with a condensed 800 title, closed by a 2px ink rule.",
+      "Do set clinical numbers in tabular figures at wdth 70, with an 11-12px grey caption naming the unit underneath.",
+      "Do reuse the station line wherever a pregnancy's progress is shown.",
+      "Do keep red lit on an overdue or out-of-range item until the item is dealt with.",
+      "Do keep every touch target at 44px or more and every interactive border at 2px ink."
+    ],
+    "donts": [
+      "Don't use cards, tinted panels or drop shadows to group content; use the 2px rule and the 1px hairline.",
+      "Don't use oggi blue for anything that is not today's position.",
+      "Don't use red for emphasis or branding; it means something is overdue, missing or out of range.",
+      "Don't introduce a second typeface or load fonts from a CDN.",
+      "Don't use pastel or baby palettes, or clinical-blue chrome."
+    ]
+  }
+}
