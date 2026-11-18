@@ -1,5 +1,6 @@
 <script lang="ts">
   import { liveQuery } from 'dexie';
+  import CancellaDati from '../components/CancellaDati.svelte';
   import ConfirmDialog from '../components/ConfirmDialog.svelte';
   import Sheet from '../components/Sheet.svelte';
   import {
@@ -14,11 +15,14 @@
     type Riepilogo,
   } from '../lib/backup';
   import { formatIT, todayISO } from '../lib/dates';
-  import { db, getImpostazioni } from '../lib/db';
+  import { aggiornaImpostazioni, db, getImpostazioni } from '../lib/db';
+  import { lock } from '../lib/lock.svelte';
+  import { hashPin, isValidPin } from '../lib/pin';
   import { serveBackup } from '../lib/overview';
 
   let ultimoBackup = $state<string | undefined>(undefined);
   let haDati = $state(false);
+  let timeoutMinuti = $state(5);
   $effect(() => {
     const sub = liveQuery(async () => ({
       imp: await getImpostazioni(),
@@ -26,6 +30,7 @@
     })).subscribe({
       next: ({ imp, mamme }) => {
         ultimoBackup = imp.ultimoBackup;
+        timeoutMinuti = imp.timeoutMinuti;
         haDati = mamme > 0;
       },
     });
@@ -131,6 +136,77 @@
     confermaAperta = false;
     apriEsporta();
   }
+
+  // --- PIN
+  type ModoPin = 'imposta' | 'cambia' | 'disattiva';
+  const TITOLI_PIN: Record<ModoPin, string> = {
+    imposta: 'Imposta PIN',
+    cambia: 'Cambia PIN',
+    disattiva: 'Disattiva PIN',
+  };
+  let modoPin = $state<ModoPin | null>(null);
+  let pinAttuale = $state('');
+  let pinNuovo = $state('');
+  let pinRipeti = $state('');
+  let erronePin = $state('');
+  let salvaPin = $state(false);
+  let esitoPin = $state('');
+
+  function apriPin(m: ModoPin) {
+    pinAttuale = pinNuovo = pinRipeti = erronePin = esitoPin = '';
+    modoPin = m;
+  }
+  const chiudiPin = () => (modoPin = null);
+
+  async function confermaPin(e: SubmitEvent) {
+    e.preventDefault();
+    const m = modoPin;
+    if (!m || salvaPin) return;
+    erronePin = '';
+    if (m !== 'disattiva') {
+      if (!isValidPin(pinNuovo)) return void (erronePin = 'Il PIN deve avere da 4 a 6 cifre.');
+      if (pinNuovo !== pinRipeti) return void (erronePin = 'I due PIN non coincidono.');
+    }
+    salvaPin = true;
+    try {
+      if (m !== 'imposta') {
+        const esito = await lock.verifica(pinAttuale);
+        if (esito !== 'ok') {
+          pinAttuale = '';
+          erronePin =
+            esito === 'attendi' || lock.attesaFino > Date.now()
+              ? 'Troppi tentativi: riprova tra 30 secondi.'
+              : 'PIN attuale errato.';
+          return;
+        }
+      }
+      if (m === 'disattiva') {
+        await aggiornaImpostazioni({ pinHash: undefined, pinSalt: undefined });
+        esitoPin = 'PIN disattivato.';
+      } else {
+        const { hash, salt } = await hashPin(pinNuovo);
+        await aggiornaImpostazioni({ pinHash: hash, pinSalt: salt });
+        esitoPin = m === 'imposta' ? 'PIN impostato.' : 'PIN cambiato.';
+      }
+      modoPin = null;
+    } catch {
+      erronePin = 'Salvataggio non riuscito.';
+    } finally {
+      salvaPin = false;
+    }
+  }
+
+  async function cambiaTimeout(e: Event) {
+    const v = Number((e.currentTarget as HTMLSelectElement).value);
+    await aggiornaImpostazioni({ timeoutMinuti: v });
+  }
+
+  // --- Cancella tutti i dati
+  let passoReset = $state<0 | 1 | 2>(0);
+  function cancellato() {
+    lock.unlock();
+    avvisa('Tutti i dati sono stati cancellati.');
+  }
 </script>
 
 <header>
@@ -184,7 +260,109 @@
       <p class="errore" role="alert">{errore}</p>
     </div>
   </section>
+
+  <section aria-labelledby="sez-blocco">
+    <h2 class="sez" id="sez-blocco">Blocco</h2>
+    <div class="riga">
+      <span class="etichetta">PIN</span>
+      <span class="valore"><b class="parola">{lock.haPin ? 'attivo' : 'non impostato'}</b></span>
+    </div>
+    <div class="corpo">
+      <p class="nota">Il PIN protegge l'accesso all'app ma non cifra i dati.</p>
+      {#if lock.haPin}
+        <label class="campo scelta">
+          <span>Blocca quando l'app resta chiusa per</span>
+          <div class="tendina">
+            <select value={String(timeoutMinuti)} onchange={cambiaTimeout}>
+              <option value="1">1 minuto</option>
+              <option value="5">5 minuti</option>
+              <option value="15">15 minuti</option>
+            </select>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+              <path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+        </label>
+        <div class="azioni">
+          <button type="button" class="btn pieno" onclick={() => apriPin('cambia')}>Cambia PIN</button>
+          <button type="button" class="btn pieno" onclick={() => apriPin('disattiva')}>Disattiva PIN</button>
+        </div>
+      {:else}
+        <div class="azioni">
+          <button type="button" class="btn primario pieno" onclick={() => apriPin('imposta')}>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+              <rect x="4" y="9" width="12" height="8.5" rx="1.5" /><path d="M7 9V6.5a3 3 0 0 1 6 0V9" />
+            </svg>
+            Imposta PIN
+          </button>
+        </div>
+      {/if}
+      <p class="esito" role="status">{esitoPin}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="sez-dati">
+    <h2 class="sez" id="sez-dati">Dati</h2>
+    <div class="corpo bordo">
+      <p class="nota">
+        Cancella dal telefono tutte le mamme, gli incontri e il PIN. Serve anche se hai dimenticato
+        il PIN: poi puoi reimportare un backup.
+      </p>
+      <button type="button" class="btn pieno" onclick={() => (passoReset = 1)}>Cancella tutti i dati</button>
+    </div>
+  </section>
 </main>
+
+<Sheet open={modoPin !== null} titolo={modoPin ? TITOLI_PIN[modoPin] : ''} onclose={chiudiPin}>
+  <form onsubmit={confermaPin}>
+    {#if modoPin !== 'imposta'}
+      <label class="campo">
+        <span>PIN attuale</span>
+        <input
+          type="password"
+          inputmode="numeric"
+          autocomplete="off"
+          maxlength="6"
+          class="num"
+          bind:value={pinAttuale}
+        />
+      </label>
+    {/if}
+    {#if modoPin !== 'disattiva'}
+      <label class="campo">
+        <span>Nuovo PIN <small>da 4 a 6 cifre</small></span>
+        <input
+          type="password"
+          inputmode="numeric"
+          autocomplete="new-password"
+          maxlength="6"
+          class="num"
+          bind:value={pinNuovo}
+        />
+      </label>
+      <label class="campo">
+        <span>Ripeti il nuovo PIN</span>
+        <input
+          type="password"
+          inputmode="numeric"
+          autocomplete="new-password"
+          maxlength="6"
+          class="num"
+          bind:value={pinRipeti}
+        />
+      </label>
+    {/if}
+    <p class="errore" role="alert">{erronePin}</p>
+    <div class="azioni">
+      <button type="submit" class="btn primario pieno" disabled={salvaPin}>
+        {modoPin === 'disattiva' ? 'Disattiva PIN' : 'Salva PIN'}
+      </button>
+      <button type="button" class="btn piano pieno" onclick={chiudiPin}>Annulla</button>
+    </div>
+  </form>
+</Sheet>
+
+<CancellaDati bind:passo={passoReset} oncancellato={cancellato} />
 
 <Sheet open={esportaAperto} titolo="Esporta backup" onclose={chiudiEsporta}>
   <p class="avviso">Il file contiene dati sanitari: conservalo in un posto sicuro e non inviarlo via chat.</p>
@@ -260,6 +438,9 @@
     font-size: 26px;
     font-weight: 800;
   }
+  .valore b.parola {
+    font-size: 17px;
+  }
   .valore small {
     font-size: 13px;
     font-weight: 600;
@@ -300,6 +481,38 @@
   }
   .errore {
     color: var(--rosso);
+  }
+  .corpo.bordo {
+    border-top: 2px solid var(--ink);
+    padding-top: 4px;
+  }
+  .tendina {
+    position: relative;
+  }
+  .tendina svg {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+  .scelta select {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 44px 10px 12px;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: var(--carta);
+    font-size: 16px;
+    font-weight: 700;
+  }
+  form .errore:not(:empty) {
+    margin: 0 0 12px;
   }
   .avviso {
     margin: 0 0 20px;
