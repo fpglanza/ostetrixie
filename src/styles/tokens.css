@@ -9,7 +9,14 @@
   --font: 'Archivo Variable', system-ui, sans-serif;
   --vicina: #FFF8D6;
   --premuto: #F6F4EC;
-  --tabbar-h: max(84px, calc(50px + env(safe-area-inset-bottom)));
+  --tabbar-base: max(84px, calc(50px + env(safe-area-inset-bottom)));
+  /* Height of the update banner above the tab bar; UpdateBanner sets it while shown. */
+  --banner-h: 0px;
+  /* Everything fixed to or padded above the bottom bar uses this, so the banner pushes it up. */
+  --tabbar-h: calc(var(--tabbar-base) + var(--banner-h));
+}
+:root.con-aggiornamento {
+  --banner-h: 52px;
 }
 
 * {

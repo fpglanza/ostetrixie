@@ -20,6 +20,8 @@
   import { hashPin, isValidPin } from '../lib/pin';
   import { serveBackup } from '../lib/overview';
 
+  const versione = __APP_VERSION__;
+
   let ultimoBackup = $state<string | undefined>(undefined);
   let haDati = $state(false);
   let timeoutMinuti = $state(5);
@@ -311,6 +313,24 @@
       <button type="button" class="btn pieno" onclick={() => (passoReset = 1)}>Cancella tutti i dati</button>
     </div>
   </section>
+
+  <section aria-labelledby="sez-app">
+    <h2 class="sez" id="sez-app">App</h2>
+    <div class="riga">
+      <span class="etichetta">Versione</span>
+      <span class="valore"><b class="parola num">{versione}</b></span>
+    </div>
+    <div class="corpo">
+      <p class="nota">Come installare l'app sul telefono e perché fare il backup.</p>
+      <a class="btn pieno" href="#/aiuto">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="10" cy="10" r="7.5" /><path d="M7.8 7.8a2.3 2.3 0 1 1 3 2.2c-.5.2-.8.6-.8 1.1v.6" stroke-linecap="round" />
+          <circle cx="10" cy="14.4" r="0.6" fill="currentColor" />
+        </svg>
+        Aiuto
+      </a>
+    </div>
+  </section>
 </main>
 
 <Sheet open={modoPin !== null} titolo={modoPin ? TITOLI_PIN[modoPin] : ''} onclose={chiudiPin}>
@@ -464,7 +484,8 @@
     flex-direction: column;
     gap: 10px;
   }
-  .azioni svg {
+  .azioni svg,
+  a.btn svg {
     width: 20px;
     height: 20px;
   }
