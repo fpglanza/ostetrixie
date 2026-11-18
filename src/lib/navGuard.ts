@@ -26,6 +26,11 @@ export interface Storia {
 
 export interface OpzioniGuardia {
   dirty: () => boolean;
+  /**
+   * The app is locked (content hidden): every hash change is undone silently, with no
+   * question and no render, so the screen under the lock stays exactly as it was.
+   */
+  bloccato?: () => boolean;
   /** Ask the user; true = leave without saving. Called at most once per pending exit. */
   chiedi: () => Promise<boolean>;
   /** Render the route for the current hash. */
@@ -37,7 +42,7 @@ const marca = () => ({ [MARCA]: 1 });
 const marcato = (s: unknown) =>
   !!s && typeof s === 'object' && (s as Record<string, unknown>)[MARCA] === 1;
 
-export function creaGuardia(storia: Storia, { dirty, chiedi, sync }: OpzioniGuardia) {
+export function creaGuardia(storia: Storia, { dirty, bloccato, chiedi, sync }: OpzioniGuardia) {
   /** Hash of the screen on display. */
   let corrente = storia.hash();
   /** Restore hashchanges we caused with back(); each lands on `corrente`. */
@@ -55,6 +60,16 @@ export function creaGuardia(storia: Storia, { dirty, chiedi, sync }: OpzioniGuar
     const h = storia.hash();
     if (attesi > 0 && h === corrente) {
       attesi--;
+      return;
+    }
+    if (bloccato?.()) {
+      if (h === corrente) return;
+      // Same restore as for a dirty form, minus the question.
+      if (marcato(storia.stato())) storia.pushState(marca(), corrente);
+      else {
+        attesi++;
+        storia.back();
+      }
       return;
     }
     if (!dirty()) {

@@ -13,7 +13,7 @@ import {
   type StatoLock,
 } from './lockPolicy';
 
-/** App.svelte wraps the routed content in `[data-contenuto]`; its open dialogs are suspended while hidden. */
+/** App.svelte wraps the routed content in `[data-contenuto]`. */
 const CONTENUTO = '[data-contenuto]';
 
 /**
@@ -22,7 +22,9 @@ const CONTENUTO = '[data-contenuto]';
  * - Later locks (timeout), the background cover and a settings error only HIDE the mounted
  *   content (`hidden` + `inert`), so a half-filled form survives; open modal dialogs are
  *   closed natively meanwhile (a top-layer dialog would show above the lock screen and make
- *   it inert) and reopened, with the scroll position, when the content shows again.
+ *   it inert) and reopened by Sheet.svelte, with the scroll position, when it shows again.
+ * - While the content is hidden the router undoes every hash change (navGuard `bloccato`),
+ *   so Back under the lock neither asks "Uscire senza salvare?" nor changes the screen.
  */
 class Lock {
   #s = $state.raw<StatoLock>(STATO_INIZIALE);
@@ -36,7 +38,6 @@ class Lock {
   #timeoutMinuti = 5;
   #hiddenAt: number | null = null;
   #sub: Subscription | null = null;
-  #sospesi: HTMLDialogElement[] = [];
   #scrollY = 0;
 
   get pronto() {
@@ -66,11 +67,9 @@ class Lock {
     if (this.#s.haPin) this.#applica({ ...this.#s, locked: true });
   }
 
-  /** `scartaDialoghi`: after a data wipe, do not reopen the dialogs that were open. */
-  unlock(opts: { scartaDialoghi?: boolean } = {}): void {
+  unlock(): void {
     this.errati = 0;
     this.attesaFino = 0;
-    if (opts.scartaDialoghi) this.#sospesi = [];
     this.#applica(dopoSblocco(this.#s));
   }
 
@@ -117,18 +116,19 @@ class Lock {
     else if (!prima && dopo) void this.#ripristina();
   }
 
+  /**
+   * Closes the content's open modals right away (synchronously, inside the visibilitychange
+   * handler, before the app-switcher snapshot). Sheet.svelte keeps them closed while the
+   * content is hidden and reopens them, state untouched, when it shows again.
+   */
   #sospendi(): void {
     this.#scrollY = window.scrollY;
-    this.#sospesi = [...document.querySelectorAll<HTMLDialogElement>(`${CONTENUTO} dialog[open]`)];
-    for (const d of this.#sospesi) d.close();
+    for (const d of document.querySelectorAll<HTMLDialogElement>(`${CONTENUTO} dialog[open]`)) d.close();
   }
 
   async #ripristina(): Promise<void> {
-    const dialoghi = this.#sospesi;
-    this.#sospesi = [];
     await tick();
     window.scrollTo(0, this.#scrollY);
-    for (const d of dialoghi) if (d.isConnected && !d.open) d.showModal();
   }
 }
 

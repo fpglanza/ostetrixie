@@ -61,6 +61,7 @@ class FakeHistory implements Storia {
 
 let h: FakeHistory;
 let dirty: boolean;
+let bloccato: boolean;
 let domande: number;
 let risposta: ((ok: boolean) => void) | null;
 let reso: string;
@@ -69,6 +70,7 @@ let guardia: ReturnType<typeof creaGuardia>;
 function avvia() {
   guardia = creaGuardia(h, {
     dirty: () => dirty,
+    bloccato: () => bloccato,
     chiedi: () => {
       domande++;
       return new Promise((r) => (risposta = r));
@@ -108,6 +110,7 @@ const C = '#/calendario';
 beforeEach(() => {
   h = new FakeHistory(M);
   dirty = false;
+  bloccato = false;
   domande = 0;
   risposta = null;
   reso = M;
@@ -250,5 +253,48 @@ describe('navGuard', () => {
     reso = '';
     guardia.navigate(M);
     expect(reso).toBe(M);
+  });
+
+  describe('while the app is locked (content hidden)', () => {
+    it('Back on a dirty form is ignored: no question, same route, still usable after unlock', async () => {
+      await apri(S);
+      await apri(F);
+      dirty = true;
+      bloccato = true;
+      await indietro();
+      expect(domande).toBe(0);
+      expect(h.hash()).toBe(F);
+      expect(reso).toBe(F);
+      bloccato = false;
+      await indietro(); // after unlock the guard works as before
+      expect(domande).toBe(1);
+      await rispondi(true);
+      expect(reso).toBe(S);
+      await indietro();
+      expect(reso).toBe(M);
+    });
+
+    it('a new entry (link, tab) is undone without a question', async () => {
+      await apri(F);
+      dirty = true;
+      bloccato = true;
+      await apri(C);
+      expect(domande).toBe(0);
+      expect(h.hash()).toBe(F);
+      expect(reso).toBe(F);
+    });
+
+    it('clean screens do not change either', async () => {
+      await apri(S);
+      await apri(C);
+      bloccato = true;
+      await indietro();
+      await apri(F);
+      expect(h.hash()).toBe(C);
+      expect(reso).toBe(C);
+      bloccato = false;
+      await indietro();
+      expect(reso).toBe(S);
+    });
   });
 });

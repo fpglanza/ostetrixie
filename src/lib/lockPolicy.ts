@@ -42,6 +42,15 @@ export function contenutoVisibile(s: StatoLock): boolean {
   return s.pronto && s.contenuto && !s.locked && !s.errore && !s.coperto;
 }
 
+/**
+ * Whether a modal dialog may be open. One inside the app content waits while the content is
+ * hidden (a top-layer modal would sit above the lock screen and make it inert); one outside
+ * it (the lock screen's own) is unaffected.
+ */
+export function dialogoMostrato(open: boolean, nelContenuto: boolean, contenutoVisibile: boolean): boolean {
+  return open && (!nelContenuto || contenutoVisibile);
+}
+
 export function dopoImpostazioni(s: StatoLock, imp: { pinHash?: string; pinSalt?: string }): StatoLock {
   const haPin = Boolean(imp.pinHash && imp.pinSalt);
   // First read, or recovery from an error (we were locked): decide afresh from the settings.

@@ -3,6 +3,7 @@ import {
   STATO_INIZIALE,
   attesaDopoErrore,
   contenutoVisibile,
+  dialogoMostrato,
   dopoErrore,
   dopoImpostazioni,
   dopoNascosto,
@@ -132,5 +133,17 @@ describe('verificaConFreno', () => {
     const dentro = await verificaConFreno('1234', hash, salt, r5.freno, 30_999);
     expect(dentro.esito).toBe('attendi');
     expect((await verificaConFreno('1234', hash, salt, r5.freno, 31_000)).esito).toBe('ok');
+  });
+});
+
+describe('dialogoMostrato', () => {
+  it('a dialog inside the content opens only while the content is visible', () => {
+    expect(dialogoMostrato(true, true, true)).toBe(true);
+    expect(dialogoMostrato(true, true, false)).toBe(false);
+    expect(dialogoMostrato(false, true, true)).toBe(false);
+  });
+  it('a dialog outside the content (lock screen) ignores the lock', () => {
+    expect(dialogoMostrato(true, false, false)).toBe(true);
+    expect(dialogoMostrato(false, false, false)).toBe(false);
   });
 });

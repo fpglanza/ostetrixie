@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { lock } from '../lib/lock.svelte';
+  import { dialogoMostrato } from '../lib/lockPolicy';
 
   let {
     open,
@@ -11,9 +13,12 @@
   let el: HTMLDialogElement;
   const uid = $props.id();
 
+  // Inside the app content, the modal waits while the content is hidden by the lock/cover
+  // and reopens on unlock with its state unchanged.
   $effect(() => {
-    if (open && !el.open) el.showModal();
-    else if (!open && el.open) el.close();
+    const mostra = dialogoMostrato(open, el.closest('[data-contenuto]') !== null, lock.visibile);
+    if (mostra && !el.open) el.showModal();
+    else if (!mostra && el.open) el.close();
   });
 </script>
 

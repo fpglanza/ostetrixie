@@ -1,3 +1,4 @@
+import { lock } from './lock.svelte';
 import { creaGuardia } from './navGuard';
 import { matchRoute, type RouteName } from './routes';
 import { confermaUscita, unsaved } from './unsaved.svelte';
@@ -40,7 +41,7 @@ const guardia =
           back: () => history.back(),
           forward: () => history.forward(),
         },
-        { dirty: () => unsaved.dirty, chiedi: confermaUscita, sync },
+        { dirty: () => unsaved.dirty, bloccato: () => !lock.visibile, chiedi: confermaUscita, sync },
       );
 
 if (guardia) window.addEventListener('hashchange', guardia.onHashChange);

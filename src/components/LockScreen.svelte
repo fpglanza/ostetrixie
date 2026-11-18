@@ -70,7 +70,7 @@
     // The data are gone: drop whatever the hidden screen was holding, then go to the empty list.
     if (uscita.chiede) rispondiUscita(false);
     unsaved.dirty = false;
-    lock.unlock({ scartaDialoghi: true });
+    lock.unlock();
     navigate('#/', { replace: true });
   }
 </script>
