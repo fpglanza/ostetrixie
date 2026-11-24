@@ -188,7 +188,7 @@
 
 <style>
   header {
-    background: var(--giallo);
+    background: var(--verde);
     padding: calc(18px + env(safe-area-inset-top)) 18px 0;
   }
   header:has(> .top:only-child) {
@@ -439,7 +439,7 @@
     padding: 0 20px;
     border-radius: 30px;
     background: var(--ink);
-    color: var(--giallo);
+    color: var(--verde);
     font-size: 16px;
     font-weight: 700;
     text-decoration: none;

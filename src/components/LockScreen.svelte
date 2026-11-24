@@ -132,7 +132,7 @@
     flex-direction: column;
     align-items: center;
     padding: calc(40px + env(safe-area-inset-top)) 24px calc(16px + env(safe-area-inset-bottom));
-    background: var(--giallo);
+    background: var(--verde);
     color: var(--ink);
   }
   .testa {
@@ -223,7 +223,7 @@
   }
   .tasto:active:not(:disabled) {
     background: var(--ink);
-    color: var(--giallo);
+    color: var(--verde);
   }
   .tasto:disabled {
     opacity: 0.45;
@@ -236,7 +236,7 @@
   .tasto.ok {
     border-color: var(--ink);
     background: var(--ink);
-    color: var(--giallo);
+    color: var(--verde);
   }
   .tasto svg {
     width: 30px;

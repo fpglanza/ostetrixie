@@ -67,7 +67,7 @@
   .accesso {
     min-height: 100dvh;
     padding: calc(40px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
-    background: var(--giallo);
+    background: var(--verde);
     color: var(--ink);
   }
   .testa {
