@@ -1,5 +1,6 @@
 <script lang="ts">
   import { useRegisterSW } from 'virtual:pwa-register/svelte';
+  import { accesso } from '../lib/accesso.svelte';
   import { lock } from '../lib/lock.svelte';
   import { confermaUscita } from '../lib/unsaved.svelte';
 
@@ -14,8 +15,8 @@
   });
 
   let chiuso = $state(false);
-  // Never over the lock screen or the background cover: only while the content is visible.
-  const mostra = $derived($needRefresh && !chiuso && lock.visibile);
+  // Never over the login, the lock screen or the background cover: only while the content is visible.
+  const mostra = $derived($needRefresh && !chiuso && accesso.entrato && lock.visibile);
 
   // Lifts the tab-bar offset (--tabbar-h) so the banner never covers save bars or "Nuova mamma".
   $effect(() => {

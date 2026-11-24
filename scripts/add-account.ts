@@ -1,7 +1,7 @@
 /**
  * npm run add-account: adds (or replaces) a login account in src/lib/accounts.json.
  * Asks for the username and the password (not echoed). Only the hash is saved.
- * Runs under plain Node (type stripping, Node >= 23.6).
+ * Runs under plain Node with type stripping: Node >= 22.18 (see "engines" in package.json).
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { stdin, stdout } from 'node:process';
@@ -25,7 +25,11 @@ const rl = createInterface({ input: stdin, output: eco, terminal: Boolean(stdin.
 const righe = rl[Symbol.asyncIterator]();
 
 async function chiedi(domanda: string, nascosto = false): Promise<string> {
-  stdout.write(domanda);
+  // The question is readline's own prompt, so a redraw (e.g. after Backspace) repeats it
+  // instead of readline's default "> ". A hidden field shows it once, then mutes the echo.
+  rl.setPrompt(domanda);
+  if (nascosto) stdout.write(domanda);
+  else rl.prompt();
   muto = nascosto;
   try {
     const r = await righe.next();
