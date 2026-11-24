@@ -17,16 +17,13 @@ export function dppFromUpm(upm: ISODate): ISODate {
   return addDays(upm, GESTATION_DAYS);
 }
 
-export function dppEffettiva(g: Pick<Gravidanza, 'upm' | 'dppEco'>): ISODate | null {
-  if (g.dppEco) return g.dppEco;
-  if (g.upm) return dppFromUpm(g.upm);
-  return null;
+export function dppEffettiva(g: Pick<Gravidanza, 'upm'>): ISODate | null {
+  return g.upm ? dppFromUpm(g.upm) : null;
 }
 
-export function egAt(g: Pick<Gravidanza, 'upm' | 'dppEco'>, date: ISODate): EG | null {
-  const dpp = dppEffettiva(g);
-  if (!dpp) return null;
-  const totaleGiorni = diffDays(addDays(dpp, -GESTATION_DAYS), date);
+export function egAt(g: Pick<Gravidanza, 'upm'>, date: ISODate): EG | null {
+  if (!g.upm) return null;
+  const totaleGiorni = diffDays(g.upm, date);
   return {
     settimane: Math.floor(totaleGiorni / 7),
     giorni: ((totaleGiorni % 7) + 7) % 7,

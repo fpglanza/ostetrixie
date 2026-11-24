@@ -24,16 +24,20 @@ describe('defaults', () => {
     expect(statoDefault(T, T)).toBe('fatto');
     expect(statoDefault('2026-11-10', T)).toBe('fatto');
   });
-  it('tipo is puerperio once the birth date is on or before the meeting', () => {
-    expect(tipoDefault(carmela, T)).toBe('controllo');
-    expect(tipoDefault(grav({ dataParto: '2026-11-17' }), T)).toBe('puerperio');
+  it('tipo is gravidanza before the birth, parto on the day, puerperio after', () => {
+    expect(tipoDefault(carmela, T)).toBe('gravidanza');
+    expect(tipoDefault(grav({ dataParto: '2026-11-17' }), T)).toBe('parto');
     expect(tipoDefault(grav({ dataParto: '2026-11-01' }), T)).toBe('puerperio');
-    expect(tipoDefault(grav({ dataParto: '2026-11-20' }), T)).toBe('controllo');
+    expect(tipoDefault(grav({ dataParto: '2026-11-20' }), T)).toBe('gravidanza');
   });
-  it('formNuovo starts today, fatto, controllo, partner not stated', () => {
+  it('formNuovo starts today, fatto, gravidanza, controllo, no pelvic floor, partner not stated', () => {
     expect(formNuovo(carmela, T)).toMatchObject({
-      data: T, ora: '', stato: 'fatto', tipo: 'controllo', partner: 'nd', sf: '', attivita: '',
+      data: T, ora: '', stato: 'fatto', tipo: 'gravidanza', visita: 'controllo', partner: 'nd',
+      pavimento: 'no', valutazionePavimento: '', sf: '', attivita: '',
     });
+  });
+  it('formNuovo marks the first meeting of a pregnancy', () => {
+    expect(formNuovo(carmela, T, true).visita).toBe('primo');
   });
 });
 
@@ -54,18 +58,22 @@ describe('parseNumero', () => {
 
 const record: Incontro = {
   id: 'i', gravidanzaId: 'g', data: '2026-11-10', ora: '10:30', stato: 'programmato',
-  tipo: 'controllo', argomento: 'Allattamento', partnerPresente: 'si', attivita: 'Visita',
-  sinfisiFondoCm: 31.5, pesoKg: 68, pressione: '110/70', bcf: '140', note: 'ok',
+  tipo: 'gravidanza', visita: 'primo', argomento: 'Allattamento', partnerPresente: 'si', attivita: 'Visita',
+  pavimentoPelvico: true, valutazionePavimento: 'Tono buono', sinfisiFondoCm: 31.5, pesoKg: 68, pressione: '110/70', bcf: '140', note: 'ok',
   createdAt: 'a', updatedAt: 'a',
 };
 
 describe('record <-> form', () => {
   it('formDaIncontro shows decimals with a comma', () => {
     expect(formDaIncontro(record)).toEqual({
-      data: '2026-11-10', ora: '10:30', stato: 'programmato', tipo: 'controllo',
-      argomento: 'Allattamento', partner: 'si', attivita: 'Visita', sf: '31,5', peso: '68',
-      pressione: '110/70', bcf: '140', note: 'ok',
+      data: '2026-11-10', ora: '10:30', stato: 'programmato', tipo: 'gravidanza', visita: 'primo',
+      argomento: 'Allattamento', partner: 'si', attivita: 'Visita', pavimento: 'si',
+      valutazionePavimento: 'Tono buono', sf: '31,5', peso: '68', pressione: '110/70', bcf: '140', note: 'ok',
     });
+  });
+  it('drops the pelvic floor notes when the evaluation is set back to no', () => {
+    const r = aIncontroInput({ ...formDaIncontro(record), pavimento: 'no' }, 'g');
+    expect(r.ok && [r.input.pavimentoPelvico, r.input.valutazionePavimento]).toEqual([undefined, undefined]);
   });
   it('round-trips into an IncontroInput', () => {
     const r = aIncontroInput(formDaIncontro(record), 'g');

@@ -76,7 +76,7 @@ describe('impostazioni', () => {
       gravidanzaId: gravidanza.id,
       data: '2026-05-01',
       stato: 'fatto',
-      tipo: 'controllo',
+      tipo: 'gravidanza',
       partnerPresente: 'si'
     });
     await aggiornaImpostazioni({ pinHash: 'h', pinSalt: 's' });

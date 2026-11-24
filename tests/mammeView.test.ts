@@ -5,7 +5,7 @@ import type { RigaMamma } from '../src/lib/overview';
 
 const T = '2026-11-17';
 const inc = (data: string, o: Partial<Incontro> = {}): Incontro => ({
-  id: 'i', gravidanzaId: 'g', data, stato: 'programmato', tipo: 'controllo',
+  id: 'i', gravidanzaId: 'g', data, stato: 'programmato', tipo: 'gravidanza',
   partnerPresente: 'nd', createdAt: '', updatedAt: '', ...o,
 });
 const riga = (mammaId: string, o: Partial<RigaMamma> = {}): RigaMamma => ({
@@ -16,12 +16,12 @@ const riga = (mammaId: string, o: Partial<RigaMamma> = {}): RigaMamma => ({
 
 describe('descriviProssimo', () => {
   it('says "oggi" with the time for a meeting today', () => {
-    expect(descriviProssimo(inc(T, { ora: '15:30' }), T)).toBe('Controllo oggi 15:30');
+    expect(descriviProssimo(inc(T, { ora: '15:30' }), T)).toBe('Gravidanza oggi 15:30');
   });
   it('uses short weekday and dd.mm otherwise', () => {
-    expect(descriviProssimo(inc('2026-11-20', { tipo: 'accompagnamento' }), T)).toBe('Accompagnamento ven 20.11');
+    expect(descriviProssimo(inc('2026-11-20', { visita: 'primo' }), T)).toBe('Gravidanza · 1° incontro ven 20.11');
     expect(descriviProssimo(inc('2026-11-26', { tipo: 'puerperio', ora: '09:00' }), T)).toBe('Puerperio gio 26.11 09:00');
-    expect(descriviProssimo(inc('2026-11-30', { tipo: 'altro' }), T)).toBe('Incontro lun 30.11');
+    expect(descriviProssimo(inc('2026-11-30', { tipo: 'parto' }), T)).toBe('Parto lun 30.11');
   });
 });
 

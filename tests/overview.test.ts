@@ -9,7 +9,7 @@ const mamma = (id: string, nome: string, o: Partial<Mamma> = {}): Mamma =>
 const grav = (id: string, mammaId: string, o: Partial<Gravidanza> = {}): Gravidanza =>
   ({ id, mammaId, stato: 'in_corso', createdAt: ts, updatedAt: ts, ...o });
 const inc = (id: string, gravidanzaId: string, data: string, o: Partial<Incontro> = {}): Incontro =>
-  ({ id, gravidanzaId, data, stato: 'programmato', tipo: 'controllo', partnerPresente: 'nd', createdAt: ts, updatedAt: ts, ...o });
+  ({ id, gravidanzaId, data, stato: 'programmato', tipo: 'gravidanza', partnerPresente: 'nd', createdAt: ts, updatedAt: ts, ...o });
 
 describe('buildRighe', () => {
   it('derives EG and DPP from UPM and joins the name', () => {
@@ -18,14 +18,6 @@ describe('buildRighe', () => {
       gravidanze: [grav('g1', 'm1', { upm: '2026-03-20' })], incontri: [],
     }, T);
     expect(r).toMatchObject({ nome: 'Carmela Rossi', sezione: 'in_gravidanza', eg: '34+4', dpp: '2026-12-25', upmMancante: false, fuoriRange: false });
-  });
-
-  it('an eco-only pregnancy has EG and is not "UPM mancante"', () => {
-    const [r] = buildRighe({
-      mamme: [mamma('m1', 'Eco')], gravidanze: [grav('g1', 'm1', { dppEco: '2027-01-10' })], incontri: [],
-    }, T);
-    expect(r.eg).not.toBeNull();
-    expect(r).toMatchObject({ dpp: '2027-01-10', upmMancante: false });
   });
 
   it('flags missing UPM and sorts it after others', () => {

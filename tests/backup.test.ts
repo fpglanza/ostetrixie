@@ -15,7 +15,7 @@ import { createMamma, getAllData, saveIncontro } from '../src/lib/repo';
 
 const inc = {
   stato: 'fatto' as const,
-  tipo: 'controllo' as const,
+  tipo: 'gravidanza' as const,
   partnerPresente: 'si' as const
 };
 
@@ -23,7 +23,7 @@ async function seed() {
   const a = await createMamma({ nome: 'Anna', archiviata: false }, { upm: '2026-03-01' });
   const b = await createMamma(
     { nome: 'Bea', cognome: 'Rossi', dataNascita: '1990-02-03', archiviata: false },
-    { upm: '2026-01-10', dppEco: '2026-10-20' }
+    { upm: '2026-01-10', upmEco: true, partner: 'Luca' }
   );
   await saveIncontro({ ...inc, gravidanzaId: a.gravidanza.id, data: '2026-05-01', pesoKg: 61.5 });
   await saveIncontro({ ...inc, gravidanzaId: a.gravidanza.id, data: '2026-06-01', ora: '10:30' });
@@ -48,7 +48,7 @@ function valido(): Backup {
         gravidanzaId: 'g1',
         data: '2026-05-01',
         stato: 'fatto',
-        tipo: 'controllo',
+        tipo: 'gravidanza',
         partnerPresente: 'si',
         createdAt: t,
         updatedAt: t
@@ -182,7 +182,7 @@ describe('backup', () => {
   it('rejects every malformed date field', () => {
     const casi: [(b: Backup) => void, RegExp][] = [
       [(b) => (b.gravidanze[0].upm = '2026-02-30'), /upm/],
-      [(b) => (b.gravidanze[0].dppEco = '20/10/2026'), /dppEco/],
+      [(b) => ((b.gravidanze[0] as unknown as Record<string, unknown>).dppEco = '20/10/2026'), /dppEco/],
       [(b) => (b.gravidanze[0].dataParto = '2026-13-01'), /dataParto/],
       [(b) => (b.mamme[0].dataNascita = 'ieri'), /dataNascita/],
       [(b) => (b.incontri[0].data = '2026-5-1'), /data/]
@@ -210,6 +210,17 @@ describe('backup', () => {
     const i = valido();
     i.incontri[0].gravidanzaId = 'nessuna';
     expect(errore(i)).toMatch(/gravidanza/);
+  });
+
+  it('imports a pre-v1.2 backup: DPP eco becomes a corrected UPM, old tipi are mapped', () => {
+    const b = valido() as unknown as { gravidanze: Record<string, unknown>[]; incontri: Record<string, unknown>[] };
+    b.gravidanze[0].dppEco = '2026-12-10';
+    b.incontri[0].tipo = 'controllo';
+    const r = validateBackup(b);
+    if (!r.ok) throw new Error(r.errore);
+    expect(r.backup.gravidanze[0]).toMatchObject({ upm: '2026-03-05', upmEco: true });
+    expect(r.backup.gravidanze[0]).not.toHaveProperty('dppEco');
+    expect(r.backup.incontri[0]).toMatchObject({ tipo: 'gravidanza', visita: 'controllo' });
   });
 
   it('accepts a valid backup and summarises it', () => {

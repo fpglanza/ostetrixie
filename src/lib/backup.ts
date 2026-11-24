@@ -1,5 +1,6 @@
 import { diffDays, isValidISODate, todayISO, type ISODate } from './dates';
 import { db, getImpostazioni } from './db';
+import { normalizzaGravidanza, normalizzaIncontro } from './migrazioni';
 import { getAllData } from './repo';
 import type { Gravidanza, Incontro, Mamma } from './types';
 
@@ -49,7 +50,10 @@ const TABELLE = {
       cognome: ['string'],
       telefono: ['string'],
       dataNascita: ['data'],
+      eta: ['number'],
+      etaAl: ['data'],
       anamnesi: ['string'],
+      anamnesiOstetrica: ['string'],
       archiviata: ['boolean', 'obbligatorio'],
       note: ['string']
     } as Campi
@@ -60,10 +64,13 @@ const TABELLE = {
       ...META,
       mammaId: ['string', 'obbligatorio'],
       upm: ['data'],
-      dppEco: ['data'],
+      upmEco: ['boolean'],
+      dppEco: ['data'], // before v1.2; turned into a corrected UPM on import
       stato: [['in_corso', 'conclusa'], 'obbligatorio'],
       dataParto: ['data'],
-      anamnesiOstetrica: ['string'],
+      anamnesiOstetrica: ['string'], // before v1.2; moved into gravidanzaAttuale on import
+      gravidanzaAttuale: ['string'],
+      partner: ['string'],
       note: ['string']
     } as Campi
   },
@@ -75,10 +82,14 @@ const TABELLE = {
       data: ['data', 'obbligatorio'],
       ora: ['string'],
       stato: [['programmato', 'fatto'], 'obbligatorio'],
-      tipo: [['controllo', 'accompagnamento', 'puerperio', 'altro'], 'obbligatorio'],
+      // controllo / accompagnamento / altro: before v1.2, normalized on import
+      tipo: [['gravidanza', 'parto', 'puerperio', 'controllo', 'accompagnamento', 'altro'], 'obbligatorio'],
+      visita: [['primo', 'controllo']],
       argomento: ['string'],
       partnerPresente: [['si', 'no', 'nd'], 'obbligatorio'],
       attivita: ['string'],
+      pavimentoPelvico: ['boolean'],
+      valutazionePavimento: ['string'],
       sinfisiFondoCm: ['number'],
       pesoKg: ['number'],
       pressione: ['string'],
@@ -164,13 +175,16 @@ export function validateBackup(raw: unknown): EsitoValidazione {
       }
     });
 
+    const parti = new Map(gravidanze.map((g) => [g.id as string, g.dataParto as string | undefined]));
     const backup: Backup = {
       formato: 'ostetrixie',
       versione: 1,
       esportatoIl: raw.esportatoIl,
       mamme: mamme as unknown as Mamma[],
-      gravidanze: gravidanze as unknown as Gravidanza[],
-      incontri: incontri as unknown as Incontro[]
+      gravidanze: gravidanze.map(normalizzaGravidanza) as unknown as Gravidanza[],
+      incontri: incontri.map((x) =>
+        normalizzaIncontro(x, parti.get(x.gravidanzaId as string))
+      ) as unknown as Incontro[]
     };
     return {
       ok: true,

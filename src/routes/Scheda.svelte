@@ -8,12 +8,12 @@
   import StationLine from '../components/StationLine.svelte';
   import { formatIT, formatShort, todayISO } from '../lib/dates';
   import { descriviProssimo } from '../lib/mammeView';
-  import { dppEffettiva, dppFromUpm, egAt, formatEG, postPartumAt } from '../lib/obstetrics';
+  import { dppEffettiva, egAt, formatEG, postPartumAt } from '../lib/obstetrics';
   import { deleteMamma, getMammaDetail, nuovaGravidanza, updateGravidanza, updateMamma } from '../lib/repo';
   import { navigate } from '../lib/router.svelte';
   import { isDirty } from '../lib/incontroForm';
-  import { erroreData, erroriGravidanza, type ErroriGravidanza } from '../lib/mammaForm';
-  import { gravidanzeScheda, prossimoIncontro, righeIncontri, testo, type RigaIncontro } from '../lib/schedaView';
+  import { aGravidanzaInput, erroreData, erroriGravidanza, etaAttuale, formGravidanza, type ErroriGravidanza } from '../lib/mammaForm';
+  import { gravidanzeScheda, prossimoIncontro, righeIncontri, type RigaIncontro } from '../lib/schedaView';
   import type { Gravidanza } from '../lib/types';
   import { unsaved } from '../lib/unsaved.svelte';
 
@@ -52,7 +52,10 @@
   const dpp = $derived(g ? dppEffettiva(g) : null);
   const prossimo = $derived(prossimoIncontro(incontri, today));
   const scaduti = $derived(righe.filter((r) => r.daRegistrare));
-  const haAnamnesi = $derived(!!(mamma?.anamnesi || g?.anamnesiOstetrica || mamma?.note));
+  const eta = $derived(mamma ? etaAttuale(mamma, today) : null);
+  const haAnamnesi = $derived(
+    !!(mamma?.anamnesi || mamma?.anamnesiOstetrica || g?.gravidanzaAttuale || g?.partner || mamma?.note),
+  );
 
   // Sheets
   let menu = $state(false);
@@ -60,8 +63,8 @@
   let precedentiAperte = $state(false);
   let dataParto = $state('');
   let partoIniziale = '';
-  const nuovaVuota = { upm: '', dppEco: '', anamnesiOstetrica: '' };
-  let nuova = $state({ ...nuovaVuota });
+  const nuovaVuota = formGravidanza();
+  let nuova = $state(formGravidanza());
   let lavoro = $state(false);
   let erroreAzione = $state('');
   let erroreParto = $state<string | undefined>(undefined);
@@ -112,13 +115,7 @@
   function creaGravidanza() {
     erroriNuova = erroriGravidanza(nuova);
     if (Object.keys(erroriNuova).length) return;
-    esegui(() =>
-      nuovaGravidanza(id, {
-        upm: testo(nuova.upm),
-        dppEco: testo(nuova.dppEco),
-        anamnesiOstetrica: testo(nuova.anamnesiOstetrica),
-      }),
-    );
+    esegui(() => nuovaGravidanza(id, aGravidanzaInput(nuova)));
   }
   const archivia = (archiviata: boolean) => esegui(() => updateMamma(id, { archiviata }));
   const elimina = () =>
@@ -195,11 +192,11 @@
   {:else if dati === null}
     <p class="msg">Mamma non trovata. <a href="#/">Torna alle mamme</a></p>
   {:else if mamma}
-    {#if mamma.archiviata || mamma.telefono || mamma.dataNascita}
+    {#if mamma.archiviata || mamma.telefono || eta !== null}
       <p class="dati">
         {#if mamma.archiviata}<b>Archiviata</b>{/if}
         {#if mamma.telefono}<a href="tel:{mamma.telefono.replace(/\s+/g, '')}" class="num">{mamma.telefono}</a>{/if}
-        {#if mamma.dataNascita}<span>nata il <span class="num">{formatIT(mamma.dataNascita)}</span></span>{/if}
+        {#if eta !== null}<span><span class="num">{eta}</span> anni</span>{/if}
       </p>
     {/if}
 
@@ -213,9 +210,8 @@
           {formatEG(eg)}<small>{eg.fuoriRange ? 'fuori range: controlla le date' : 'settimane oggi'}</small>
         </div>
         <div class="arrivo num">
-          <b>{formatIT(dpp)}</b><span>DPP{g?.dppEco ? ' corretta da eco' : ''}</span>
-          {#if g?.dppEco && g.upm}<span>da UPM {formatIT(dppFromUpm(g.upm))}</span>{/if}
-          {#if g?.upm}<span>UPM {formatIT(g.upm)}</span>{/if}
+          <b>{formatIT(dpp)}</b><span>DPP</span>
+          {#if g?.upm}<span>UPM {formatIT(g.upm)}{g.upmEco ? ' da eco' : ''}</span>{/if}
         </div>
         <div class="linea"><StationLine totaleGiorni={eg.totaleGiorni} /></div>
       {:else}
@@ -243,7 +239,9 @@
         <p class="vuoto">Nessuna anamnesi registrata.</p>
       {/if}
       {#if mamma.anamnesi}<h3>Generale</h3><p class="testo">{mamma.anamnesi}</p>{/if}
-      {#if g?.anamnesiOstetrica}<h3>Ostetrica</h3><p class="testo">{g.anamnesiOstetrica}</p>{/if}
+      {#if mamma.anamnesiOstetrica}<h3>Ostetrica</h3><p class="testo">{mamma.anamnesiOstetrica}</p>{/if}
+      {#if g?.gravidanzaAttuale}<h3>Gravidanza attuale</h3><p class="testo">{g.gravidanzaAttuale}</p>{/if}
+      {#if g?.partner}<h3>Partner</h3><p class="testo">{g.partner}</p>{/if}
       {#if mamma.note}<h3>Note</h3><p class="testo">{mamma.note}</p>{/if}
     </details>
 
@@ -273,7 +271,7 @@
         {#each grav.precedenti as p (p.id)}
           <section class="precedente">
             <h3 class="num">{intestazione(p)}</h3>
-            {#if p.anamnesiOstetrica}<p class="testo">{p.anamnesiOstetrica}</p>{/if}
+            {#if p.gravidanzaAttuale}<p class="testo">{p.gravidanzaAttuale}</p>{/if}
             {@render orario(righeIncontri(dati?.incontriByGravidanza[p.id] ?? [], p, today))}
           </section>
         {/each}
@@ -328,13 +326,15 @@
     {#if g && !g.dataParto}
       <p class="nota">La gravidanza attuale sarà chiusa senza data del parto e passerà tra le precedenti.</p>
     {/if}
-    <CampiGravidanza
-      bind:upm={nuova.upm}
-      bind:dppEco={nuova.dppEco}
-      bind:anamnesiOstetrica={nuova.anamnesiOstetrica}
-      {today}
-      errori={erroriNuova}
-    />
+    <CampiGravidanza bind:upm={nuova.upm} bind:upmEco={nuova.upmEco} {today} errori={erroriNuova} />
+    <label class="campo">
+      <span>Gravidanza attuale <small>ecografie, esami…</small></span>
+      <textarea bind:value={nuova.gravidanzaAttuale} rows="3" autocapitalize="sentences"></textarea>
+    </label>
+    <label class="campo">
+      <span>Partner</span>
+      <textarea bind:value={nuova.partner} rows="2" autocapitalize="sentences"></textarea>
+    </label>
     <div class="azioni">
       {#if erroreAzione}<p class="errore" role="alert">{erroreAzione}</p>{/if}
       <button type="button" class="btn primario pieno" disabled={lavoro} onclick={creaGravidanza}>Crea gravidanza</button>

@@ -5,21 +5,19 @@
 
   let {
     upm = $bindable(''),
-    dppEco = $bindable(''),
-    anamnesiOstetrica = $bindable(''),
+    upmEco = $bindable('no'),
     today,
     errori = {},
   }: {
     upm: string;
-    dppEco: string;
-    anamnesiOstetrica: string;
+    upmEco: 'si' | 'no';
     today: ISODate;
-    /** Field errors shown under the dates after a rejected save. */
+    /** Field errors shown under the date after a rejected save. */
     errori?: ErroriGravidanza;
   } = $props();
   const uid = $props.id();
 
-  const ante = $derived(anteprimaGravidanza({ upm, dppEco }, today));
+  const ante = $derived(anteprimaGravidanza({ upm }, today));
 </script>
 
 <div class="coppia">
@@ -34,24 +32,24 @@
     />
     {#if errori.upm}<small id="{uid}-upm" class="err">{errori.upm}</small>{/if}
   </label>
-  <label class="campo">
-    <span>DPP da eco <small>se corretta</small></span>
-    <input
-      type="date"
-      bind:value={dppEco}
-      class:da-compilare={!dppEco}
-      aria-invalid={errori.dppEco ? 'true' : undefined}
-      aria-describedby={errori.dppEco ? `${uid}-eco` : undefined}
-    />
-    {#if errori.dppEco}<small id="{uid}-eco" class="err">{errori.dppEco}</small>{/if}
-  </label>
+  <fieldset class="segmenti">
+    <legend>Da eco</legend>
+    <div class="opzioni">
+      {#each [['si', 'Sì'], ['no', 'No']] as [v, l] (v)}
+        <label>
+          <input type="radio" name="{uid}-eco" value={v} bind:group={upmEco} />
+          {l}
+        </label>
+      {/each}
+    </div>
+  </fieldset>
 </div>
 
 <div class="ante" aria-live="polite">
   {#if ante}
     <div>
       <b class="num">{formatIT(ante.dpp)}</b>
-      <span>DPP{dppEco && ante.dppDaUpm ? ` · da UPM ${formatIT(ante.dppDaUpm)}` : dppEco ? ' da eco' : ''}</span>
+      <span>DPP{upmEco === 'si' ? ' da eco' : ''}</span>
     </div>
     <div class="destra">
       <b class="num" class:fuori={ante.fuoriRange}>{ante.eg}</b>
@@ -61,11 +59,6 @@
     <span>Inserisci l'UPM per calcolare DPP ed epoca.</span>
   {/if}
 </div>
-
-<label class="campo">
-  <span>Anamnesi ostetrica <small>di questa gravidanza</small></span>
-  <textarea bind:value={anamnesiOstetrica} rows="3"></textarea>
-</label>
 
 <style>
   .ante {

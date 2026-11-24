@@ -19,7 +19,7 @@ import {
 const incontroBase = {
   data: '2026-05-01',
   stato: 'fatto' as const,
-  tipo: 'controllo' as const,
+  tipo: 'gravidanza' as const,
   partnerPresente: 'si' as const
 };
 

@@ -19,10 +19,6 @@ describe('egAt', () => {
     expect(eg).toEqual({ settimane: 34, giorni: 4, totaleGiorni: 242, fuoriRange: false });
     expect(formatEG(eg!)).toBe('34+4');
   });
-  it('uses eco DPP when present', () => {
-    expect(egAt({ upm: '2026-03-20', dppEco: '2026-12-30' }, '2026-11-17')!.totaleGiorni).toBe(237);
-    expect(dppEffettiva({ upm: '2026-03-20', dppEco: '2026-12-30' })).toBe('2026-12-30');
-  });
   it('flags out of range', () => {
     const upm = '2026-03-20';
     expect(egAt({ upm }, addDays(upm, 309))).toMatchObject({ totaleGiorni: 309, fuoriRange: true });
@@ -34,8 +30,6 @@ describe('egAt', () => {
   it('handles missing UPM', () => {
     expect(egAt({}, '2026-11-17')).toBeNull();
     expect(dppEffettiva({})).toBeNull();
-    expect(dppEffettiva({ dppEco: '2027-01-10' })).toBe('2027-01-10');
-    expect(egAt({ dppEco: '2027-01-10' }, '2026-11-17')).not.toBeNull();
   });
   it('dppEffettiva falls back to UPM-derived DPP', () => {
     expect(dppEffettiva({ upm: '2026-03-20' })).toBe('2026-12-25');

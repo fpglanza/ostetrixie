@@ -127,6 +127,7 @@ export async function copiaIncontro(
       data: src.data,
       ora: src.ora,
       tipo: src.tipo,
+      visita: src.visita,
       stato: src.stato,
       argomento: src.argomento,
       attivita: src.attivita,
