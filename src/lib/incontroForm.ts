@@ -11,12 +11,15 @@ export interface FormIncontro {
   ora: string;
   stato: Incontro['stato'];
   tipo: Incontro['tipo'];
+  visita: NonNullable<Incontro['visita']>;
   argomento: string;
   partner: Incontro['partnerPresente'];
   attivita: string;
-  sf: string;
+  pavimento: 'si' | 'no';
+  valutazionePavimento: string;
   peso: string;
   pressione: string;
+  sf: string;
   bcf: string;
   note: string;
 }
@@ -25,22 +28,28 @@ export function statoDefault(data: ISODate, today: ISODate): Incontro['stato'] {
   return data > today ? 'programmato' : 'fatto';
 }
 
+/** Puerperio after the birth date, parto on the day itself, gravidanza before. */
 export function tipoDefault(g: Pick<Gravidanza, 'dataParto'>, data: ISODate): Incontro['tipo'] {
-  return g.dataParto && g.dataParto <= data ? 'puerperio' : 'controllo';
+  if (!g.dataParto || data < g.dataParto) return 'gravidanza';
+  return data === g.dataParto ? 'parto' : 'puerperio';
 }
 
-export function formNuovo(g: Pick<Gravidanza, 'dataParto'>, today: ISODate): FormIncontro {
+/** `primo`: the pregnancy has no meetings yet, so this one starts as the first. */
+export function formNuovo(g: Pick<Gravidanza, 'dataParto'>, today: ISODate, primo = false): FormIncontro {
   return {
     data: today,
     ora: '',
     stato: statoDefault(today, today),
     tipo: tipoDefault(g, today),
+    visita: primo ? 'primo' : 'controllo',
     argomento: '',
     partner: 'nd',
     attivita: '',
-    sf: '',
+    pavimento: 'no',
+    valutazionePavimento: '',
     peso: '',
     pressione: '',
+    sf: '',
     bcf: '',
     note: '',
   };
@@ -52,12 +61,15 @@ export function formDaIncontro(i: Incontro): FormIncontro {
     ora: i.ora ?? '',
     stato: i.stato,
     tipo: i.tipo,
+    visita: i.visita ?? 'controllo',
     argomento: i.argomento ?? '',
     partner: i.partnerPresente,
     attivita: i.attivita ?? '',
-    sf: numeroIT(i.sinfisiFondoCm),
+    pavimento: i.pavimentoPelvico ? 'si' : 'no',
+    valutazionePavimento: i.valutazionePavimento ?? '',
     peso: numeroIT(i.pesoKg),
     pressione: i.pressione ?? '',
+    sf: numeroIT(i.sinfisiFondoCm),
     bcf: i.bcf ?? '',
     note: i.note ?? '',
   };
@@ -92,9 +104,12 @@ export function aIncontroInput(
       ora: testo(f.ora),
       stato: f.stato,
       tipo: f.tipo,
+      visita: f.visita,
       argomento: testo(f.argomento),
       partnerPresente: f.partner,
       attivita: testo(f.attivita),
+      pavimentoPelvico: f.pavimento === 'si' ? true : undefined,
+      valutazionePavimento: f.pavimento === 'si' ? testo(f.valutazionePavimento) : undefined,
       sinfisiFondoCm: sf ?? undefined,
       pesoKg: peso ?? undefined,
       pressione: testo(f.pressione),
@@ -111,7 +126,7 @@ export function isDirty<F extends { [K in keyof F]: string }>(f: F, base: F): bo
 
 /** Live line under the date: EG at that date, time since birth, or what is missing. */
 export function lineaEpoca(
-  g: Pick<Gravidanza, 'upm' | 'dppEco' | 'dataParto'>,
+  g: Pick<Gravidanza, 'upm' | 'dataParto'>,
   data: string,
 ): { testo: string; tono: 'ok' | 'fuori' | 'manca' } | null {
   if (!isValidISODate(data)) return null;

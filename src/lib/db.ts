@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie';
+import { normalizzaGravidanza, normalizzaIncontro } from './migrazioni';
 import type { Gravidanza, Impostazioni, Incontro, Mamma } from './types';
 
 class OstetrixieDB extends Dexie {
@@ -9,12 +10,32 @@ class OstetrixieDB extends Dexie {
 
   constructor() {
     super('ostetrixie');
-    this.version(1).stores({
+    const stores = {
       mamme: 'id, archiviata',
       gravidanze: 'id, mammaId, stato',
       incontri: 'id, gravidanzaId, data, stato',
       impostazioni: 'id'
-    });
+    };
+    this.version(1).stores(stores);
+    // v1.2: UPM-only dating with an eco flag; incontro tipo gravidanza / parto / puerperio.
+    this.version(2)
+      .stores(stores)
+      .upgrade(async (tx) => {
+        const parti = new Map<string, string | undefined>();
+        await tx
+          .table('gravidanze')
+          .toCollection()
+          .modify((g, ref) => {
+            parti.set(g.id, g.dataParto);
+            ref.value = normalizzaGravidanza(g);
+          });
+        await tx
+          .table('incontri')
+          .toCollection()
+          .modify((i, ref) => {
+            ref.value = normalizzaIncontro(i, parti.get(i.gravidanzaId));
+          });
+      });
   }
 }
 

@@ -2,7 +2,7 @@
   import CampiGravidanza from '../components/CampiGravidanza.svelte';
   import { todayISO } from '../lib/dates';
   import { isDirty } from '../lib/incontroForm';
-  import { erroriMamma, formMamma, type ErroriMamma, type FormMamma } from '../lib/mammaForm';
+  import { aGravidanzaInput, campiEta, erroriMamma, formMamma, type ErroriMamma, type FormMamma } from '../lib/mammaForm';
   import { navigate } from '../lib/router.svelte';
   import {
     createMamma,
@@ -23,6 +23,7 @@
   let base = $state<FormMamma | null>(null);
 
   let corrente: Gravidanza | null = null;
+  let etaCaricata = '';
   let caricata = $state(false);
   let nonTrovata = $state(false);
   let erroreCaricamento = $state(false);
@@ -43,7 +44,8 @@
           return;
         }
         corrente = gravidanzeScheda(d.gravidanze).corrente;
-        form = formMamma(d.mamma, corrente);
+        form = formMamma(d.mamma, corrente, today);
+        etaCaricata = form.eta;
         base = { ...form };
         caricata = true;
       },
@@ -76,11 +78,12 @@
       nome: form.nome.trim(),
       cognome: testo(form.cognome),
       telefono: testo(form.telefono),
-      dataNascita: testo(form.dataNascita),
+      ...campiEta(form.eta, etaCaricata, today),
       anamnesi: testo(form.anamnesi),
+      anamnesiOstetrica: testo(form.anamnesiOstetrica),
       note: testo(form.note),
     };
-    const g = { upm: testo(form.upm), dppEco: testo(form.dppEco), anamnesiOstetrica: testo(form.anamnesiOstetrica) };
+    const g = aGravidanzaInput(form);
     try {
       let mid = id;
       if (mid) {
@@ -137,39 +140,49 @@
           <input type="tel" bind:value={form.telefono} autocomplete="off" inputmode="tel" />
         </label>
         <label class="campo">
-          <span>Data di nascita</span>
+          <span>Età <small>anni</small></span>
           <input
-            type="date"
-            bind:value={form.dataNascita}
-            class:da-compilare={!form.dataNascita}
-            max={today}
-            aria-invalid={errori.dataNascita ? 'true' : undefined}
-            aria-describedby={errori.dataNascita ? 'err-nascita' : undefined}
+            bind:value={form.eta}
+            inputmode="numeric"
+            autocomplete="off"
+            class="num"
+            aria-invalid={errori.eta ? 'true' : undefined}
+            aria-describedby={errori.eta ? 'err-eta' : undefined}
           />
-          {#if errori.dataNascita}<small id="err-nascita" class="err">{errori.dataNascita}</small>{/if}
+          {#if errori.eta}<small id="err-eta" class="err">{errori.eta}</small>{/if}
         </label>
       </div>
     </div>
 
     <h2 class="sez">Gravidanza</h2>
     <div class="gruppo">
-      <CampiGravidanza
-        bind:upm={form.upm}
-        bind:dppEco={form.dppEco}
-        bind:anamnesiOstetrica={form.anamnesiOstetrica}
-        {today}
-        {errori}
-      />
+      <CampiGravidanza bind:upm={form.upm} bind:upmEco={form.upmEco} {today} {errori} />
     </div>
 
-    <h2 class="sez">Anamnesi e note</h2>
+    <h2 class="sez">Anamnesi</h2>
     <div class="gruppo">
       <label class="campo">
-        <span>Anamnesi <small>generale</small></span>
-        <textarea bind:value={form.anamnesi} rows="4"></textarea>
+        <span>Anamnesi generale</span>
+        <textarea bind:value={form.anamnesi} rows="4" autocapitalize="sentences"></textarea>
       </label>
       <label class="campo">
-        <span>Note</span>
+        <span>Anamnesi ostetrica <small>gravidanze e parti precedenti</small></span>
+        <textarea bind:value={form.anamnesiOstetrica} rows="3" autocapitalize="sentences"></textarea>
+      </label>
+      <label class="campo">
+        <span>Gravidanza attuale <small>ecografie, esami…</small></span>
+        <textarea bind:value={form.gravidanzaAttuale} rows="4" autocapitalize="sentences"></textarea>
+      </label>
+      <label class="campo">
+        <span>Partner</span>
+        <textarea bind:value={form.partner} rows="2" autocapitalize="sentences"></textarea>
+      </label>
+    </div>
+
+    <h2 class="sez">Note</h2>
+    <div class="gruppo">
+      <label class="campo">
+        <span class="nascosto">Note</span>
         <textarea bind:value={form.note} rows="3"></textarea>
       </label>
     </div>
@@ -246,6 +259,14 @@
     color: var(--rosso);
     font-weight: 700;
     font-size: 14px;
+  }
+  .nascosto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .msg {
     margin: 0;

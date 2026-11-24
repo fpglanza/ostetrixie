@@ -1,12 +1,11 @@
 import { isValidISODate, type ISODate } from './dates';
-import { TIPO } from './mammeView';
-import { dppEffettiva, dppFromUpm, egAt, formatEG, postPartumAt } from './obstetrics';
+import { etichettaIncontro } from './mammeView';
+import { dppEffettiva, egAt, formatEG, postPartumAt } from './obstetrics';
 import { byDataOra, currentGravidanza } from './overview';
 import type { Gravidanza, Incontro } from './types';
 
 export interface Anteprima {
   dpp: ISODate;
-  dppDaUpm: ISODate | null;
   eg: string;
   fuoriRange: boolean;
 }
@@ -14,16 +13,12 @@ export interface Anteprima {
 const data = (s: string | undefined) => (s && isValidISODate(s) ? s : undefined);
 
 /** Live DPP + today's EG for the pregnancy fields; null until a valid date is typed. */
-export function anteprimaGravidanza(
-  g: { upm?: string; dppEco?: string },
-  today: ISODate,
-): Anteprima | null {
+export function anteprimaGravidanza(g: { upm?: string }, today: ISODate): Anteprima | null {
   const upm = data(g.upm);
-  const dppEco = data(g.dppEco);
-  const dpp = dppEffettiva({ upm, dppEco });
-  const eg = egAt({ upm, dppEco }, today);
+  const dpp = dppEffettiva({ upm });
+  const eg = egAt({ upm }, today);
   if (!dpp || !eg) return null;
-  return { dpp, dppDaUpm: upm ? dppFromUpm(upm) : null, eg: formatEG(eg), fuoriRange: eg.fuoriRange };
+  return { dpp, eg: formatEG(eg), fuoriRange: eg.fuoriRange };
 }
 
 /** The pregnancy the scheda is about, and the others newest first. */
@@ -68,7 +63,7 @@ export function righeIncontri(incontri: Incontro[], g: Gravidanza, today: ISODat
         n: k + 1,
         epoca: pp ? pp.replace(/^parto /, '') : eg ? formatEG(eg) : null,
         fuoriRange: eg?.fuoriRange ?? false,
-        tipo: TIPO[i.tipo],
+        tipo: etichettaIncontro(i),
         sf: i.sinfisiFondoCm != null ? `SF ${numeroIT(i.sinfisiFondoCm)} cm` : null,
         partner: i.partnerPresente === 'si',
         programmato: i.stato === 'programmato',

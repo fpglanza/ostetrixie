@@ -10,7 +10,7 @@ import type { Gravidanza, Incontro } from '../src/lib/types';
 
 const T = '2026-11-17';
 const inc = (id: string, data: string, o: Partial<Incontro> = {}): Incontro => ({
-  id, gravidanzaId: 'g', data, stato: 'fatto', tipo: 'controllo',
+  id, gravidanzaId: 'g', data, stato: 'fatto', tipo: 'gravidanza',
   partnerPresente: 'nd', createdAt: '', updatedAt: '', ...o,
 });
 const grav = (id: string, o: Partial<Gravidanza> = {}): Gravidanza => ({
@@ -20,12 +20,7 @@ const grav = (id: string, o: Partial<Gravidanza> = {}): Gravidanza => ({
 describe('anteprimaGravidanza', () => {
   it('computes DPP and today EG from UPM (Carmela on 17/11/2026)', () => {
     expect(anteprimaGravidanza({ upm: '2026-03-20' }, T)).toEqual({
-      dpp: '2026-12-25', dppDaUpm: '2026-12-25', eg: '34+4', fuoriRange: false,
-    });
-  });
-  it('uses the eco DPP when given and keeps the UPM one aside', () => {
-    expect(anteprimaGravidanza({ upm: '2026-03-20', dppEco: '2026-12-30' }, T)).toEqual({
-      dpp: '2026-12-30', dppDaUpm: '2026-12-25', eg: '33+6', fuoriRange: false,
+      dpp: '2026-12-25', eg: '34+4', fuoriRange: false,
     });
   });
   it('flags an out-of-range EG', () => {
@@ -76,7 +71,7 @@ describe('righeIncontri', () => {
   });
   it('shows EG at the meeting date, tipo, SF and partner', () => {
     const [r] = righeIncontri([inc('a', '2026-11-10', { sinfisiFondoCm: 33, partnerPresente: 'si' })], g, T);
-    expect(r).toMatchObject({ epoca: '33+4', fuoriRange: false, tipo: 'Controllo', sf: 'SF 33 cm', partner: true, daRegistrare: false });
+    expect(r).toMatchObject({ epoca: '33+4', fuoriRange: false, tipo: 'Gravidanza', sf: 'SF 33 cm', partner: true, daRegistrare: false });
   });
   it('writes SF with the Italian decimal comma', () => {
     const [r] = righeIncontri([inc('a', '2026-11-10', { sinfisiFondoCm: 33.5 })], g, T);
@@ -84,9 +79,9 @@ describe('righeIncontri', () => {
   });
   it('marks a past programmato as da registrare, a future one not', () => {
     const r = righeIncontri(
-      [inc('old', '2026-11-16', { stato: 'programmato' }), inc('new', T, { stato: 'programmato', tipo: 'accompagnamento' })], g, T);
+      [inc('old', '2026-11-16', { stato: 'programmato' }), inc('new', T, { stato: 'programmato', tipo: 'puerperio', visita: 'primo' })], g, T);
     expect(r.map((x) => [x.incontro.id, x.daRegistrare, x.programmato])).toEqual([['new', false, true], ['old', true, true]]);
-    expect(r[0].tipo).toBe('Accompagnamento');
+    expect(r[0].tipo).toBe('Puerperio · 1° incontro');
   });
   it('shows time since birth for meetings after the birth date', () => {
     const gp = grav('g', { upm: '2026-01-20', dataParto: '2026-10-27', stato: 'conclusa' });

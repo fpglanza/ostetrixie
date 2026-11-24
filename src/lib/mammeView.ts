@@ -3,18 +3,22 @@ import type { RigaMamma } from './overview';
 import type { Incontro } from './types';
 
 export const TIPO: Record<Incontro['tipo'], string> = {
-  controllo: 'Controllo',
-  accompagnamento: 'Accompagnamento',
+  gravidanza: 'Gravidanza',
+  parto: 'Parto',
   puerperio: 'Puerperio',
-  altro: 'Incontro',
 };
+
+/** "Gravidanza", "Puerperio · 1° incontro". */
+export function etichettaIncontro(i: Pick<Incontro, 'tipo' | 'visita'>): string {
+  return TIPO[i.tipo] + (i.visita === 'primo' ? ' · 1° incontro' : '');
+}
 
 const VICINA_GIORNI = 14;
 
-/** "Controllo oggi 15:30", "Accompagnamento ven 20.11". */
+/** "Gravidanza oggi 15:30", "Puerperio · 1° incontro ven 20.11". */
 export function descriviProssimo(i: Incontro, today: ISODate): string {
   const quando = i.data === today ? 'oggi' : `${weekdayIT(i.data, true)} ${formatShort(i.data)}`;
-  return [TIPO[i.tipo], quando, i.ora].filter(Boolean).join(' ');
+  return [etichettaIncontro(i), quando, i.ora].filter(Boolean).join(' ');
 }
 
 /** mammaId of the pregnant mamma nearest her DPP, if within 14 days either side. */

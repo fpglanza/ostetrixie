@@ -63,6 +63,7 @@
   let avvisoTimer: ReturnType<typeof setTimeout> | undefined;
 
   const haMisure = (f: FormIncontro) => !!(f.sf || f.peso || f.pressione || f.bcf);
+  const apriMisure = (f: FormIncontro) => f.tipo === 'gravidanza' || haMisure(f);
 
   $effect(() => {
     carica().catch(() => (erroreCaricamento = true));
@@ -77,15 +78,17 @@
     }
     mamma = ctx.mamma;
     grav = ctx.gravidanza;
-    const f = inc ? formDaIncontro(inc.incontro) : formNuovo(ctx.gravidanza, today);
+    const tutti = await getAllData();
+    const primo = !tutti.incontri.some((i) => i.gravidanzaId === ctx.gravidanza.id);
+    const f = inc ? formDaIncontro(inc.incontro) : formNuovo(ctx.gravidanza, today, primo);
     if (inc) {
       salvatoId = inc.incontro.id;
       statoCaricato = inc.incontro.stato;
     }
     form = f;
     base = { ...f };
-    misureAperte = f.tipo === 'controllo' || haMisure(f);
-    destinatari = destinatariCopia(await getAllData(), ctx.mamma.id, today);
+    misureAperte = apriMisure(f);
+    destinatari = destinatariCopia(tutti, ctx.mamma.id, today);
     if (inc && copiaDopoSalvataggio === inc.incontro.id) {
       copiaDopoSalvataggio = null;
       scelti = [];
@@ -111,7 +114,10 @@
     form.data = v;
     if (nuovo && grav) {
       if (!toccatoStato) form.stato = statoDefault(v, today);
-      if (!toccatoTipo) form.tipo = tipoDefault(grav, v);
+      if (!toccatoTipo) {
+        form.tipo = tipoDefault(grav, v);
+        if (form.tipo === 'gravidanza') misureAperte = true;
+      }
     }
   }
 
@@ -273,8 +279,8 @@
 
       <fieldset class="segmenti">
         <legend>Tipo</legend>
-        <div class="opzioni griglia">
-          {#each [['controllo', 'Controllo'], ['accompagnamento', 'Accompagnamento'], ['puerperio', 'Puerperio'], ['altro', 'Altro']] as [v, l] (v)}
+        <div class="opzioni">
+          {#each [['gravidanza', 'Gravidanza'], ['parto', 'Parto'], ['puerperio', 'Puerperio']] as [v, l] (v)}
             <label>
               <input
                 type="radio"
@@ -283,9 +289,21 @@
                 bind:group={form.tipo}
                 onchange={() => {
                   toccatoTipo = true;
-                  if (v === 'controllo') misureAperte = true;
+                  if (v === 'gravidanza') misureAperte = true;
                 }}
               />
+              {l}
+            </label>
+          {/each}
+        </div>
+      </fieldset>
+
+      <fieldset class="segmenti">
+        <legend>Incontro</legend>
+        <div class="opzioni">
+          {#each [['primo', '1° incontro'], ['controllo', 'Controllo']] as [v, l] (v)}
+            <label>
+              <input type="radio" name="visita" value={v} bind:group={form.visita} />
               {l}
             </label>
           {/each}
@@ -313,6 +331,24 @@
         <span>Cosa ho fatto</span>
         <textarea bind:this={attivitaEl} bind:value={form.attivita} rows="4" autocapitalize="sentences"></textarea>
       </label>
+
+      <fieldset class="segmenti">
+        <legend>Valutazione pavimento pelvico</legend>
+        <div class="opzioni">
+          {#each [['si', 'Sì'], ['no', 'No']] as [v, l] (v)}
+            <label>
+              <input type="radio" name="pavimento" value={v} bind:group={form.pavimento} />
+              {l}
+            </label>
+          {/each}
+        </div>
+      </fieldset>
+      {#if form.pavimento === 'si'}
+        <label class="campo">
+          <span>Valutazione</span>
+          <textarea bind:value={form.valutazionePavimento} rows="4" autocapitalize="sentences"></textarea>
+        </label>
+      {/if}
     </div>
 
     <details class="misure" bind:open={misureAperte}>
@@ -320,19 +356,8 @@
         Misure
         <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
       </summary>
+      <p class="chi">Mamma</p>
       <div class="coppia">
-        <label class="campo">
-          <span>SF <small>cm</small></span>
-          <input
-            bind:value={form.sf}
-            inputmode="decimal"
-            autocomplete="off"
-            class="num"
-            aria-invalid={errori.sf ? 'true' : undefined}
-            aria-describedby={errori.sf ? 'err-sf' : undefined}
-          />
-          {#if errori.sf}<small id="err-sf" class="err">{errori.sf}</small>{/if}
-        </label>
         <label class="campo">
           <span>Peso <small>kg</small></span>
           <input
@@ -348,6 +373,21 @@
         <label class="campo">
           <span>Pressione <small>mmHg</small></span>
           <input bind:value={form.pressione} autocomplete="off" class="num" placeholder="120/80" />
+        </label>
+      </div>
+      <p class="chi">Bambino</p>
+      <div class="coppia">
+        <label class="campo">
+          <span>SF <small>cm</small></span>
+          <input
+            bind:value={form.sf}
+            inputmode="decimal"
+            autocomplete="off"
+            class="num"
+            aria-invalid={errori.sf ? 'true' : undefined}
+            aria-describedby={errori.sf ? 'err-sf' : undefined}
+          />
+          {#if errori.sf}<small id="err-sf" class="err">{errori.sf}</small>{/if}
         </label>
         <label class="campo">
           <span>BCF <small>bpm</small></span>
@@ -494,6 +534,14 @@
   .misure {
     padding: 0 18px;
     border-bottom: 1px solid var(--filo);
+  }
+  .chi {
+    margin: 4px 0 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--grigio);
   }
   .misure summary {
     display: flex;

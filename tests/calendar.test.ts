@@ -9,7 +9,7 @@ const mamma = (id: string, nome: string, o: Partial<Mamma> = {}): Mamma =>
 const grav = (id: string, mammaId: string, o: Partial<Gravidanza> = {}): Gravidanza =>
   ({ id, mammaId, stato: 'in_corso', createdAt: ts, updatedAt: ts, ...o });
 const inc = (id: string, gravidanzaId: string, data: string, o: Partial<Incontro> = {}): Incontro =>
-  ({ id, gravidanzaId, data, stato: 'programmato', tipo: 'controllo', partnerPresente: 'nd', createdAt: ts, updatedAt: ts, ...o });
+  ({ id, gravidanzaId, data, stato: 'programmato', tipo: 'gravidanza', partnerPresente: 'nd', createdAt: ts, updatedAt: ts, ...o });
 
 const data = {
   mamme: [
