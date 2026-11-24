@@ -17,7 +17,8 @@ function letto(): boolean {
  * If storage is unavailable the login simply holds for this session only.
  */
 class Accesso {
-  entrato = $state(typeof localStorage !== 'undefined' && letto());
+  // letto() alone: reading `localStorage` itself throws when the browser blocks site storage.
+  entrato = $state(letto());
 
   async entra(username: string, password: string): Promise<boolean> {
     if (!(await verificaCredenziali(username, password, accounts as Account[]))) return false;
