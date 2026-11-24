@@ -93,7 +93,7 @@
     padding: 0 16px;
     border-radius: 22px;
     background: var(--ink);
-    color: var(--giallo);
+    color: var(--verde);
     font-size: 15px;
     font-weight: 800;
   }

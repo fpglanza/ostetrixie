@@ -1,18 +1,18 @@
 :root {
-  --giallo: #F4CC1E;
+  --verde: #4FB874;
   --ink: #141414;
   --carta: #FFFFFF;
   --rosso: #D2271F;
   --oggi: #1E5BD8;
   --grigio: #5C5C5C;
   --filo: #E3E0D6;
-  --font: 'Archivo Variable', system-ui, sans-serif;
-  --vicina: #FFF8D6;
+  --font: 'Fredoka Variable', system-ui, sans-serif;
+  --vicina: #E6F5EA;
   /* The phone column: on wider screens the app stays this wide, centred. */
   --col: 480px;
   /* Mamme's docked "Nuova mamma" strip: 44px pill + 2×4px + 1px hairline. */
   --dock-h: 53px;
-  --premuto: #F6F4EC;
+  --premuto: #EFF5F0;
   --tabbar-base: max(84px, calc(50px + env(safe-area-inset-bottom)));
   /* Height of the update banner above the tab bar; UpdateBanner sets it while shown. */
   --banner-h: 0px;
@@ -72,7 +72,7 @@ textarea {
 }
 
 ::selection {
-  background: var(--giallo);
+  background: var(--verde);
   color: var(--ink);
 }
 

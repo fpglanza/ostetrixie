@@ -72,7 +72,7 @@
     border-radius: 8px;
   }
   a.on svg {
-    background: var(--giallo);
+    background: var(--verde);
   }
   a:focus-visible {
     outline-offset: -2px;

@@ -22,7 +22,7 @@
 }
 .btn.primario {
   background: var(--ink);
-  color: var(--giallo);
+  color: var(--verde);
 }
 .btn.pericolo {
   background: var(--rosso);

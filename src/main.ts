@@ -1,4 +1,4 @@
-import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource-variable/fredoka/wdth.css';
 import './styles/tokens.css';
 import './styles/ui.css';
 import { mount } from 'svelte';

@@ -1,7 +1,7 @@
 {
   "name": "ostetrixie",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,7 @@
     "add-account": "node scripts/add-account.ts"
   },
   "dependencies": {
-    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/fredoka": "^5.3.0",
     "dexie": "^4.4.7"
   },
   "devDependencies": {

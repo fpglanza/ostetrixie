@@ -2,18 +2,18 @@
 name: Ostetrixie
 description: An offline caseload for one midwife, set like the yellow Partenze poster of an Italian station.
 colors:
-  giallo: "#F4CC1E"
+  verde: "#4FB874"
   ink: "#141414"
   carta: "#FFFFFF"
   rosso: "#D2271F"
   oggi: "#1E5BD8"
   grigio: "#5C5C5C"
   filo: "#E3E0D6"
-  vicina: "#FFF8D6"
-  premuto: "#F6F4EC"
+  vicina: "#E6F5EA"
+  premuto: "#EFF5F0"
 typography:
   display:
-    fontFamily: "'Archivo Variable', system-ui, sans-serif"
+    fontFamily: "'Fredoka Variable', system-ui, sans-serif"
     fontSize: "72px"
     fontWeight: 800
     lineHeight: 0.9
@@ -21,21 +21,21 @@ typography:
     fontFeature: "tnum"
     fontVariation: "'wdth' 70"
   headline:
-    fontFamily: "'Archivo Variable', system-ui, sans-serif"
+    fontFamily: "'Fredoka Variable', system-ui, sans-serif"
     fontSize: "40px"
     fontWeight: 800
     lineHeight: 1.1
     letterSpacing: "-0.02em"
     fontVariation: "'wdth' 75"
   title:
-    fontFamily: "'Archivo Variable', system-ui, sans-serif"
+    fontFamily: "'Fredoka Variable', system-ui, sans-serif"
     fontSize: "26px"
     fontWeight: 800
     lineHeight: 1.15
     letterSpacing: "-0.01em"
     fontVariation: "'wdth' 75"
   figure:
-    fontFamily: "'Archivo Variable', system-ui, sans-serif"
+    fontFamily: "'Fredoka Variable', system-ui, sans-serif"
     fontSize: "34px"
     fontWeight: 800
     lineHeight: 1
@@ -43,29 +43,29 @@ typography:
     fontFeature: "tnum"
     fontVariation: "'wdth' 70"
   figure-small:
-    fontFamily: "'Archivo Variable', system-ui, sans-serif"
+    fontFamily: "'Fredoka Variable', system-ui, sans-serif"
     fontSize: "20px"
     fontWeight: 800
     lineHeight: 1.1
     fontFeature: "tnum"
     fontVariation: "'wdth' 70"
   name:
-    fontFamily: "'Archivo Variable', system-ui, sans-serif"
+    fontFamily: "'Fredoka Variable', system-ui, sans-serif"
     fontSize: "17px"
     fontWeight: 700
     lineHeight: 1.2
   body:
-    fontFamily: "'Archivo Variable', system-ui, sans-serif"
+    fontFamily: "'Fredoka Variable', system-ui, sans-serif"
     fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.4
   meta:
-    fontFamily: "'Archivo Variable', system-ui, sans-serif"
+    fontFamily: "'Fredoka Variable', system-ui, sans-serif"
     fontSize: "13px"
     fontWeight: 400
     lineHeight: 1.3
   label:
-    fontFamily: "'Archivo Variable', system-ui, sans-serif"
+    fontFamily: "'Fredoka Variable', system-ui, sans-serif"
     fontSize: "12px"
     fontWeight: 700
     lineHeight: 1.2
@@ -94,7 +94,7 @@ components:
     backgroundColor: "{colors.premuto}"
   button-primary:
     backgroundColor: "{colors.ink}"
-    textColor: "{colors.giallo}"
+    textColor: "{colors.verde}"
     rounded: "{rounded.pill}"
     padding: "0 20px"
     height: "50px"
@@ -115,11 +115,11 @@ components:
     textColor: "{colors.carta}"
     height: "46px"
   header:
-    backgroundColor: "{colors.giallo}"
+    backgroundColor: "{colors.verde}"
     textColor: "{colors.ink}"
     padding: "18px 18px 14px"
   tab-active-icon:
-    backgroundColor: "{colors.giallo}"
+    backgroundColor: "{colors.verde}"
     textColor: "{colors.ink}"
     rounded: "{rounded.field}"
   tab-inactive:

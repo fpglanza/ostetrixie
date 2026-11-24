@@ -95,12 +95,12 @@
     position: fixed;
     inset: 0;
     z-index: 50;
-    background: var(--giallo);
+    background: var(--verde);
   }
   .errore-blocco {
     min-height: 100dvh;
     padding: calc(40px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
-    background: var(--giallo);
+    background: var(--verde);
   }
   .errore-blocco h1 {
     margin: 0 0 14px;
@@ -127,6 +127,6 @@
     margin: 0 auto;
     z-index: 20;
     height: env(safe-area-inset-top);
-    background: var(--giallo);
+    background: var(--verde);
   }
 </style>

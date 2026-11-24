@@ -421,7 +421,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    background: var(--giallo);
+    background: var(--verde);
     padding: calc(12px + env(safe-area-inset-top)) 18px 12px 6px;
     border-bottom: 2px solid var(--ink);
   }

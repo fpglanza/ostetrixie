@@ -18,7 +18,7 @@ export default defineConfig({
         id: '/ostetrixie/',
         start_url: '/ostetrixie/',
         scope: '/ostetrixie/',
-        theme_color: '#F4CC1E',
+        theme_color: '#4FB874',
         background_color: '#FFFFFF',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },

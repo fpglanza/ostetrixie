@@ -203,7 +203,7 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    background: var(--giallo);
+    background: var(--verde);
     padding: calc(18px + env(safe-area-inset-top)) 18px 14px;
     border-bottom: 2px solid var(--ink);
   }
