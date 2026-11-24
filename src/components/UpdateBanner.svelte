@@ -15,8 +15,9 @@
   });
 
   let chiuso = $state(false);
-  // Never over the login, the lock screen or the background cover: only while the content is visible.
-  const mostra = $derived($needRefresh && !chiuso && accesso.entrato && lock.visibile);
+  // Never over the lock screen or the background cover: only while the content is visible.
+  // It does show on the login screen: a cached old version may not know a newly added account.
+  const mostra = $derived($needRefresh && !chiuso && (!accesso.entrato || lock.visibile));
 
   // Lifts the tab-bar offset (--tabbar-h) so the banner never covers save bars or "Nuova mamma".
   $effect(() => {
